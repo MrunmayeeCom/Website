@@ -2,19 +2,22 @@ import axios from "axios";
 
 import API from "./AxiosInstance";
 
-// ✅ FIXED: send amount + currency
+type BillingCycle = "monthly" | "quarterly" | "yearly";
+
 export const createOrder = async ({
   userId,
   licenseId,
+  billingCycle,
 }: {
   userId: string;
   licenseId: string;
+  billingCycle: BillingCycle;
 }) => {
   const res = await API.post(`/api/payment/create-order`, {
     userId,
     licenseId,
+    billingCycle, 
   });
-
   return res.data;
 };
 

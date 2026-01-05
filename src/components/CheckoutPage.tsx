@@ -59,11 +59,11 @@ export function CheckoutPage({
     const base = lmsPlan.monthlyPrice;
 
     if (billingCycle === "monthly") return base;
-    if (billingCycle === "quarterly") return Math.round(base * 3 * 0.9);
-    return Math.round(base * 12 * 0.8);
+    if (billingCycle === "quarterly") return base * 3 * 0.9;
+    return base * 12 * 0.8;
   };
 
-  const getTax = () => Math.round(getPrice() * 0.18);
+  const getTax = () => getPrice() * 0.18;
   const getTotal = () => getPrice() + getTax();
 
   /* ---------------- HANDLERS ---------------- */
@@ -105,7 +105,7 @@ export function CheckoutPage({
         });
 
         alert("Free plan activated successfully 🎉");
-        window.location.replace("https://dashboard-tsw3.onrender.com");
+        window.location.replace("https://geo-track-em3s.onrender.com");
         return;
       }
 
@@ -135,6 +135,7 @@ export function CheckoutPage({
       const order = await createOrder({
         userId,
         licenseId: lmsPlan.licenseId,
+        billingCycle,
       });
 
       if (!order?.orderId) {
@@ -169,7 +170,7 @@ export function CheckoutPage({
           });
 
           alert("Payment successful 🎉");
-          window.location.replace("https://dashboard-tsw3.onrender.com");
+          window.location.replace("https://geo-track-em3s.onrender.com");
         },
         theme: { color: "#2563eb" },
       });
@@ -462,13 +463,6 @@ const getSavingsPercent = () => {
                 <div className="flex justify-between items-baseline">
                   <span>Total Amount</span>
                   <span className="text-2xl">₹{getTotal().toLocaleString()}</span>
-                </div>
-
-                <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg space-y-2">
-                  <p className="text-sm">14-Day Free Trial</p>
-                  <p className="text-xs text-muted-foreground">
-                    You won't be charged until your trial ends. Cancel anytime during the trial period.
-                  </p>
                 </div>
 
                 <div className="space-y-2 text-xs text-muted-foreground">

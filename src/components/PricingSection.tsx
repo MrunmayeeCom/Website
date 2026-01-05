@@ -62,8 +62,8 @@ export function PricingSection({ onPlanSelect }: PricingSectionProps) {
   if (plan.isFree) return 0;
 
   if (billingCycle === "monthly") return plan.price;
-  if (billingCycle === "quarterly") return Math.round(plan.price * 3 * 0.9);
-  return Math.round(plan.price * 12 * 0.8);
+  if (billingCycle === "quarterly") return plan.price * 3 * 0.9;
+  return plan.price * 12 * 0.8;
   };
 
   const getBillingText = () => {
