@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // ✅ ADD THIS
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
@@ -30,6 +31,7 @@ export function CheckoutPage({
   onBack,
   onProceedToPayment,
 }: CheckoutPageProps) {
+  const navigate = useNavigate(); // ✅ ADD THIS LINE
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(initialBillingCycle);
 
   const [formData, setFormData] = useState({
@@ -43,7 +45,6 @@ export function CheckoutPage({
     gstNumber: "",
   });
 
-  // ✅ MUST be inside component
   const [lmsPlan, setLmsPlan] = useState<{
     licenseId: string;
     monthlyPrice: number;
@@ -77,7 +78,6 @@ export function CheckoutPage({
     }
 
     try {
-      // Backend allows only monthly / yearly
       const backendBillingCycle =
         billingCycle === "quarterly" ? "monthly" : billingCycle;
 
@@ -162,16 +162,28 @@ export function CheckoutPage({
           contact: formData.phone,
         },
         handler: async (response: any) => {
-          await verifyPayment({
-            transactionId,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_signature: response.razorpay_signature,
-          });
+          try {
+            // Verify payment first
+            await verifyPayment({
+              transactionId,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+            });
 
-          window.location.href = `/payment-success?txn=${transactionId}&plan=${encodeURIComponent(
-            selectedPlan
-          )}&cycle=${billingCycle}`;
+            // ✅ USE NAVIGATE INSTEAD OF WINDOW.LOCATION.HREF
+            navigate(`/payment-success?txn=${transactionId}&plan=${encodeURIComponent(
+              selectedPlan
+            )}&cycle=${billingCycle}`);
+          } catch (verifyError) {
+            console.error("Payment verification failed:", verifyError);
+            alert("Payment verification failed. Please contact support with transaction ID: " + transactionId);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            console.log("Payment cancelled by user");
+          }
         },
         theme: { color: "#2563eb" },
       });
@@ -192,28 +204,27 @@ export function CheckoutPage({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-
   const getBillingText = () => {
-  switch (billingCycle) {
-    case "monthly":
-      return "Monthly";
-    case "quarterly":
-      return "Quarterly";
-    case "yearly":
-      return "Yearly";
-  }
-};
+    switch (billingCycle) {
+      case "monthly":
+        return "Monthly";
+      case "quarterly":
+        return "Quarterly";
+      case "yearly":
+        return "Yearly";
+    }
+  };
 
-const getSavingsPercent = () => {
-  switch (billingCycle) {
-    case "monthly":
-      return 0;
-    case "quarterly":
-      return 10;
-    case "yearly":
-      return 20;
-  }
-};
+  const getSavingsPercent = () => {
+    switch (billingCycle) {
+      case "monthly":
+        return 0;
+      case "quarterly":
+        return 10;
+      case "yearly":
+        return 20;
+    }
+  };
 
   /* ---------------- LMS LOAD ---------------- */
 
@@ -254,7 +265,6 @@ const getSavingsPercent = () => {
     loadPlanFromLMS();
   }, [selectedPlan]);
 
-  // ✅ MUST be inside component
   if (loading || !lmsPlan) return null;
 
   return (
@@ -425,7 +435,7 @@ const getSavingsPercent = () => {
 
                 <div>
                   <p className="text-sm text-muted-foreground mb-3">Billing Cycle</p>
-                  <Tabs value={billingCycle} onValueChange={(value: BillingCycle) => setBillingCycle(value )}>
+                  <Tabs value={billingCycle} onValueChange={(value) => setBillingCycle(value as BillingCycle)}>
                     <TabsList className="grid w-full grid-cols-3">
                       <TabsTrigger value="monthly" className="text-xs">Monthly</TabsTrigger>
                       <TabsTrigger value="quarterly" className="text-xs">
