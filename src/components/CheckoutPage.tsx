@@ -1,489 +1,220 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ ADD THIS
 import { Button } from "./ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Separator } from "./ui/separator";
-import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
-import { ArrowLeft, Building2, Mail, Phone, MapPin, CreditCard } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
-import { purchaseLicense } from "../api/license";
-import { createOrder, verifyPayment } from "../api/payment";
-import { checkCustomerExists, syncCustomer } from "../api/customerSync";
-import { loadRazorpay } from "../utils/loadRazorpay"
+import { Card, CardContent } from "./ui/card";
+import { CheckCircle2, Download, ArrowRight } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { getTransactionDetails } from "../api/payment";
+import { generateInvoice } from "../utils/generateInvoice";
 
-type BillingCycle = "monthly" | "quarterly" | "yearly";
-
-interface CheckoutPageProps {
-  selectedPlan: string;
-  initialBillingCycle: "monthly" | "quarterly" | "yearly";
-  onBack: () => void;
-  onProceedToPayment: (
-    billingCycle: "monthly" | "quarterly" | "yearly",
-    formData: any
-  ) => void;
-}
-
-export function CheckoutPage({
-  selectedPlan,
-  initialBillingCycle,
-  onBack,
-  onProceedToPayment,
-}: CheckoutPageProps) {
-  const navigate = useNavigate(); // ✅ ADD THIS LINE
-  const [billingCycle, setBillingCycle] = useState<BillingCycle>(initialBillingCycle);
-
-  const [formData, setFormData] = useState({
-    companyName: "",
-    email: "",
-    phone: "",
-    address: "",
-    city: "",
-    state: "",
-    pincode: "",
-    gstNumber: "",
-  });
-
-  const [lmsPlan, setLmsPlan] = useState<{
-    licenseId: string;
-    monthlyPrice: number;
-  } | null>(null);
+export function PaymentSuccess() {
+  const [params] = useSearchParams();
+  const transactionId = params.get("txn");
+  const planId = params.get("plan");
+  const cycle = params.get("cycle") as 'monthly' | 'quarterly' | 'yearly';
 
   const [loading, setLoading] = useState(true);
-
-  /* ---------------- PRICE LOGIC ---------------- */
-
-  const getPrice = () => {
-    if (!lmsPlan) return 0;
-
-    const base = lmsPlan.monthlyPrice;
-
-    if (billingCycle === "monthly") return base;
-    if (billingCycle === "quarterly") return base * 3 * 0.9;
-    return base * 12 * 0.8;
-  };
-
-  const getTax = () => getPrice() * 0.18;
-  const getTotal = () => getPrice() + getTax();
-
-  /* ---------------- HANDLERS ---------------- */
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!lmsPlan) {
-      alert("Plan not loaded");
-      return;
-    }
-
-    try {
-      const backendBillingCycle =
-        billingCycle === "quarterly" ? "monthly" : billingCycle;
-
-      // 1️⃣ Ensure customer exists in LMS
-      const exists = await checkCustomerExists(formData.email);
-      if (!exists) {
-        await syncCustomer({
-          name: formData.companyName,
-          email: formData.email,
-          source: "GeoTrack",
-        });
-      }
-
-      /* ======================================================
-        🔴 FREE PLAN FLOW (NO RAZORPAY)
-      ====================================================== */
-      if (lmsPlan.monthlyPrice === 0) {
-        await purchaseLicense({
-          name: formData.companyName,
-          email: formData.email,
-          licenseId: lmsPlan.licenseId, 
-          billingCycle: "monthly",
-          amount: 0,
-          currency: "INR",
-        });
-
-        alert("Free plan activated successfully 🎉");
-        window.location.replace("https://geo-track-em3s.onrender.com");
-        return;
-      }
-
-      /* ======================================================
-        🟢 PAID PLAN FLOW
-      ====================================================== */
-
-      // 2️⃣ Create PENDING transaction in LMS FIRST
-      const purchaseRes = await purchaseLicense({
-        name: formData.companyName,
-        email: formData.email,
-        licenseId: lmsPlan.licenseId,
-        billingCycle: backendBillingCycle,
-        amount: getTotal(),
-        currency: "INR",
-      });
-
-      const { data } = purchaseRes;
-
-      if (!data?.transactionId || !data?.userId) {
-        throw new Error("Transaction data missing from LMS");
-      }
-
-      const { transactionId, userId } = data;
-
-      // 3️⃣ Create Razorpay order using LMS userId
-      const order = await createOrder({
-        userId,
-        licenseId: lmsPlan.licenseId,
-        billingCycle,
-      });
-
-      if (!order?.orderId) {
-        throw new Error("Failed to create Razorpay order");
-      }
-
-      // 4️⃣ Load Razorpay SDK
-      const loaded = await loadRazorpay();
-      if (!loaded) {
-        alert("Failed to load Razorpay");
-        return;
-      }
-
-      // 5️⃣ Open Razorpay popup
-      const rzp = new (window as any).Razorpay({
-        key: order.key,
-        amount: order.amount,
-        currency: order.currency,
-        order_id: order.orderId,
-        name: "GeoTrack",
-        prefill: {
-          name: formData.companyName,
-          email: formData.email,
-          contact: formData.phone,
-        },
-        handler: async (response: any) => {
-          try {
-            // Verify payment first
-            await verifyPayment({
-              transactionId,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_signature: response.razorpay_signature,
-            });
-
-            // ✅ USE NAVIGATE INSTEAD OF WINDOW.LOCATION.HREF
-            navigate(`/payment-success?txn=${transactionId}&plan=${encodeURIComponent(
-              selectedPlan
-            )}&cycle=${billingCycle}`);
-          } catch (verifyError) {
-            console.error("Payment verification failed:", verifyError);
-            alert("Payment verification failed. Please contact support with transaction ID: " + transactionId);
-          }
-        },
-        modal: {
-          ondismiss: () => {
-            console.log("Payment cancelled by user");
-          }
-        },
-        theme: { color: "#2563eb" },
-      });
-
-      rzp.open();
-    } catch (err: any) {
-      console.error("Payment error:", err);
-
-      const message =
-        err?.response?.data?.message ||
-        "Something went wrong. Please try again.";
-
-      alert(message);
-    }
-  };
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const getBillingText = () => {
-    switch (billingCycle) {
-      case "monthly":
-        return "Monthly";
-      case "quarterly":
-        return "Quarterly";
-      case "yearly":
-        return "Yearly";
-    }
-  };
-
-  const getSavingsPercent = () => {
-    switch (billingCycle) {
-      case "monthly":
-        return 0;
-      case "quarterly":
-        return 10;
-      case "yearly":
-        return 20;
-    }
-  };
-
-  /* ---------------- LMS LOAD ---------------- */
+  const [transaction, setTransaction] = useState<any>(null);
 
   useEffect(() => {
-    const loadPlanFromLMS = async () => {
+    if (!transactionId) return;
+
+    const fetchTransaction = async () => {
       try {
-        const res = await fetch(
-          "https://lisence-system.onrender.com/api/license/licenses-by-product/69589d3ba7306459dd47fd87",
-          {
-            headers: {
-              "x-api-key": "my-secret-key-123",
-            },
-          }
-        );
-
-        const data = await res.json();
-
-        const matched = data.licenses.find(
-          (lic: any) =>
-            lic?.licenseType?._id === selectedPlan
-        );
-
-        if (!matched) {
-          throw new Error("Selected plan not found in LMS");
-        }
-
-        setLmsPlan({
-          licenseId: matched._id,
-          monthlyPrice: matched.licenseType.price.amount,
-        });
+        const data = await getTransactionDetails(transactionId);
+        setTransaction(data);
       } catch (err) {
-        console.error("Failed to load checkout plan", err);
+        console.error("Failed to load transaction", err);
       } finally {
         setLoading(false);
       }
     };
 
-    loadPlanFromLMS();
-  }, [selectedPlan]);
+    fetchTransaction();
+  }, [transactionId]);
 
-  if (loading || !lmsPlan) return null;
+  const handleDownloadInvoice = () => {
+    if (!transaction) {
+      alert("Transaction data not available");
+      return;
+    }
+
+    // Get user data from localStorage (set during checkout)
+    const userData = localStorage.getItem("user");
+    const user = userData ? JSON.parse(userData) : { name: "Customer", email: "" };
+
+    // Calculate pricing
+    const baseAmount = transaction.amount / 100; // Convert from paise to rupees
+    const gstAmount = baseAmount * 0.18;
+    const totalAmount = baseAmount + gstAmount;
+
+    // Prepare invoice data
+    const invoiceData = {
+      transactionId: transaction.transactionId,
+      date: transaction.createdAt,
+      customerName: user.name,
+      customerEmail: user.email,
+      customerPhone: transaction.phone || "",
+      customerAddress: transaction.address || "",
+      planName: getPlanName(transaction.plan || planId),
+      billingCycle: cycle || 'monthly',
+      amount: baseAmount,
+      gst: gstAmount,
+      total: totalAmount,
+      status: transaction.status,
+    };
+
+    // Generate and download PDF
+    generateInvoice(invoiceData);
+  };
+
+  const getPlanName = (planId: string) => {
+    // Map plan IDs to readable names
+    const planNames: { [key: string]: string } = {
+      'starter': 'Starter',
+      'professional': 'Professional',
+      'business': 'Business',
+      'enterprise': 'Enterprise',
+    };
+    
+    // Try to find by ID or use the planId directly
+    return planNames[planId.toLowerCase()] || transaction.plan || 'Professional';
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading payment details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!transaction) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="max-w-md">
+          <CardContent className="pt-6 text-center">
+            <div className="text-red-600 mb-4">
+              <svg className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold mb-2">Transaction Not Found</h2>
+            <p className="text-muted-foreground mb-4">
+              We couldn't find the transaction details. Please contact support if you've made a payment.
+            </p>
+            <Button onClick={() => window.location.href = "/home"}>
+              Go to Home
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-background py-12">
-      <div className="container mx-auto px-4 max-w-7xl">
-        <Button 
-          variant="ghost" 
-          onClick={onBack}
-          className="mb-6"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Plans
-        </Button>
+    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white py-12 flex items-center justify-center">
+      <div className="container mx-auto px-4 max-w-3xl">
+        <Card className="border-green-200 shadow-xl">
+          <CardContent className="pt-12 pb-8 text-center space-y-8">
+            <div className="flex justify-center">
+              <div className="rounded-full bg-green-100 p-6 animate-bounce">
+                <CheckCircle2 className="h-20 w-20 text-green-600" />
+              </div>
+            </div>
 
-        <div className="text-center mb-8">
-          <h1 className="mb-2">Complete Your Order</h1>
-          <p className="text-muted-foreground">
-            Just one step away from transforming your field sales
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Payment Successful!</h1>
+              <p className="text-muted-foreground">
+                Your subscription is now active
+              </p>
+            </div>
+
+            {/* Order Details */}
+            <div className="bg-blue-50 p-6 rounded-lg text-left space-y-3">
+              <h3 className="text-lg font-semibold">Order Details</h3>
+
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Plan</span>
+                <span className="font-medium">{getPlanName(transaction.plan || planId)}</span>
+              </div>
+
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Billing Cycle</span>
+                <span className="font-medium capitalize">{cycle || 'monthly'}</span>
+              </div>
+
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Amount</span>
+                <span className="font-medium">
+                  ₹{(transaction.amount / 100).toFixed(2)}
+                </span>
+              </div>
+
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Status</span>
+                <span className="text-green-600 font-semibold uppercase">
+                  {transaction.status}
+                </span>
+              </div>
+
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Date</span>
+                <span className="font-medium">
+                  {new Date(transaction.createdAt).toLocaleDateString('en-IN', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-3">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleDownloadInvoice}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Download Invoice
+              </Button>
+
+              <Button
+                size="lg"
+                className="w-full bg-blue-600 hover:bg-blue-700"
+                onClick={() =>
+                  window.location.href = "https://geo-track-em3s.onrender.com/dashboard"
+                }
+              >
+                Go to Dashboard
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
+
+            <div className="pt-6 border-t text-xs text-muted-foreground">
+              <p className="mb-2">Transaction ID: {transaction.transactionId}</p>
+              <p>
+                Questions? Email{" "}
+                <a
+                  href="mailto:support@trackon.com"
+                  className="text-blue-600 hover:underline"
+                >
+                  support@trackon.com
+                </a>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="mt-8 text-center text-sm text-muted-foreground bg-white p-4 rounded-lg shadow">
+          <p className="flex items-center justify-center gap-2">
+            <span className="text-2xl">🎉</span>
+            <span>Welcome to GeoTrack! Check your email for login credentials and next steps.</span>
           </p>
-        </div>
-
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left Side - Form */}
-          <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Billing Information</CardTitle>
-                <CardDescription>
-                  Enter your company and billing details
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="companyName">Company Name *</Label>
-                      <div className="relative">
-                        <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="companyName"
-                          placeholder="Enter company name"
-                          value={formData.companyName}
-                          onChange={(e) => handleInputChange('companyName', e.target.value)}
-                          className="pl-10"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email Address *</Label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="email"
-                          type="email"
-                          placeholder="company@example.com"
-                          value={formData.email}
-                          onChange={(e) => handleInputChange('email', e.target.value)}
-                          className="pl-10"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone Number *</Label>
-                      <div className="relative">
-                        <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="phone"
-                          type="tel"
-                          placeholder="+91 98765 43210"
-                          value={formData.phone}
-                          onChange={(e) => handleInputChange('phone', e.target.value)}
-                          className="pl-10"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="address">Address *</Label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="address"
-                          placeholder="Street address"
-                          value={formData.address}
-                          onChange={(e) => handleInputChange('address', e.target.value)}
-                          className="pl-10"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="city">City *</Label>
-                      <Input
-                        id="city"
-                        placeholder="City"
-                        value={formData.city}
-                        onChange={(e) => handleInputChange('city', e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="state">State *</Label>
-                      <Input
-                        id="state"
-                        placeholder="State"
-                        value={formData.state}
-                        onChange={(e) => handleInputChange('state', e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="pincode">Pincode *</Label>
-                      <Input
-                        id="pincode"
-                        placeholder="400001"
-                        value={formData.pincode}
-                        onChange={(e) => handleInputChange('pincode', e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="gstNumber">GST Number (Optional)</Label>
-                      <Input
-                        id="gstNumber"
-                        placeholder="22AAAAA0000A1Z5"
-                        value={formData.gstNumber}
-                        onChange={(e) => handleInputChange('gstNumber', e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="pt-4 flex justify-end">
-                    <Button type="submit" size="lg" className="gap-2">
-                      <CreditCard className="h-4 w-4" />
-                      Proceed to Payment
-                    </Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Right Side - Order Summary */}
-          <div className="lg:col-span-1">
-            <Card className="sticky top-6">
-              <CardHeader>
-                <CardTitle>Order Summary</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Selected Plan</p>
-                  <div className="flex items-center justify-between">
-                    <span>{selectedPlan}</span>
-                    <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-sm">
-                      {getBillingText()}
-                    </span>
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-sm text-muted-foreground mb-3">Billing Cycle</p>
-                  <Tabs value={billingCycle} onValueChange={(value) => setBillingCycle(value as BillingCycle)}>
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="monthly" className="text-xs">Monthly</TabsTrigger>
-                      <TabsTrigger value="quarterly" className="text-xs">
-                        Quarterly
-                        <span className="ml-1 text-[10px] text-green-600 dark:text-green-400">-10%</span>
-                      </TabsTrigger>
-                      <TabsTrigger value="yearly" className="text-xs">
-                        Yearly
-                        <span className="ml-1 text-[10px] text-green-600 dark:text-green-400">-20%</span>
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                </div>
-
-                <Separator />
-
-                <div className="space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Plan Price</span>
-                    <span>₹{getPrice().toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">GST (18%)</span>
-                    <span>₹{getTax().toLocaleString()}</span>
-                  </div>
-                  {getSavingsPercent() > 0 && (
-                    <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
-                      <span>Discount ({getSavingsPercent()}%)</span>
-                      <span>You Save!</span>
-                    </div>
-                  )}
-                </div>
-
-                <Separator />
-
-                <div className="flex justify-between items-baseline">
-                  <span>Total Amount</span>
-                  <span className="text-2xl">₹{getTotal().toLocaleString()}</span>
-                </div>
-
-                <div className="space-y-2 text-xs text-muted-foreground">
-                  <p>✓ Secure payment processing</p>
-                  <p>✓ Money-back guarantee</p>
-                  <p>✓ Cancel anytime</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </div>
       </div>
     </div>
