@@ -1,4 +1,5 @@
 import axios from "axios";
+
 import API from "./AxiosInstance";
 
 type BillingCycle = "monthly" | "quarterly" | "yearly";
@@ -7,15 +8,18 @@ export const createOrder = async ({
   userId,
   licenseId,
   billingCycle,
+  amount,
 }: {
   userId: string;
   licenseId: string;
   billingCycle: BillingCycle;
+  amount: number; // 👈 ADD THIS
 }) => {
   const res = await API.post(`/api/payment/create-order`, {
     userId,
     licenseId,
-    billingCycle, 
+    billingCycle,
+    amount, // 👈 SEND IT
   });
   return res.data;
 };
@@ -31,18 +35,11 @@ export const getTransactionDetails = async (transactionId: string) => {
   return res.data;
 };
 
-// ✅ Download invoice - opens in new tab
 export const downloadInvoice = (transactionId: string) => {
-  if (!transactionId) {
-    console.error("No transaction ID provided");
-    return;
-  }
+  if (!transactionId) return;
 
-  // ✅ Use the API baseURL from AxiosInstance
-  const invoiceUrl = `${API.defaults.baseURL}/api/payment/invoice/${transactionId}`;
-  
-  console.log("Opening invoice URL:", invoiceUrl);
-  
-  // Open in new tab
-  window.open(invoiceUrl, "_blank");
+  window.open(
+    `https://lisence-system.onrender.com/api/payment/invoice/${transactionId}`,
+    "_blank"
+  );
 };

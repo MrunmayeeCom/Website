@@ -61,7 +61,7 @@ export const isAuthenticated = () => {
 
 // Get user from localStorage (no API call)
 export const getStoredUser = () => {
-  const userDataStr = localStorage.getItem("userData");
+  const userDataStr = localStorage.getItem("user");
   if (!userDataStr) return null;
   
   try {

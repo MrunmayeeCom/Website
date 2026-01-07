@@ -11,6 +11,8 @@ import { purchaseLicense } from "../api/license";
 import { createOrder, verifyPayment } from "../api/payment";
 import { checkCustomerExists, syncCustomer } from "../api/customerSync";
 import { loadRazorpay } from "../utils/loadRazorpay"
+import { getStoredUser } from "../api/auth";
+
 
 type BillingCycle = "monthly" | "quarterly" | "yearly";
 
@@ -31,6 +33,8 @@ export function CheckoutPage({
   onProceedToPayment,
 }: CheckoutPageProps) {
   const navigate = useNavigate();
+
+  const loggedInUser = getStoredUser();
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(initialBillingCycle);
 
   const [formData, setFormData] = useState({
@@ -46,6 +50,7 @@ export function CheckoutPage({
 
   const [lmsPlan, setLmsPlan] = useState<{
     licenseId: string;
+    planName: string;   
     monthlyPrice: number;
   } | null>(null);
 
@@ -73,11 +78,11 @@ export function CheckoutPage({
     try {
       const backendBillingCycle = billingCycle === "quarterly" ? "monthly" : billingCycle;
 
-      const exists = await checkCustomerExists(formData.email);
+      const exists = await checkCustomerExists(loggedInUser.email);
       if (!exists) {
         await syncCustomer({
           name: formData.companyName,
-          email: formData.email,
+          email: loggedInUser.email,
           source: "GeoTrack",
         });
       }
@@ -85,7 +90,7 @@ export function CheckoutPage({
       if (lmsPlan.monthlyPrice === 0) {
         await purchaseLicense({
           name: formData.companyName,
-          email: formData.email,
+          email: loggedInUser.email,
           licenseId: lmsPlan.licenseId, 
           billingCycle: "monthly",
           amount: 0,
@@ -99,7 +104,7 @@ export function CheckoutPage({
 
       const purchaseRes = await purchaseLicense({
         name: formData.companyName,
-        email: formData.email,
+        email: loggedInUser.email,
         licenseId: lmsPlan.licenseId,
         billingCycle: backendBillingCycle,
         amount: getTotal(),
@@ -139,7 +144,7 @@ export function CheckoutPage({
         name: "GeoTrack",
         prefill: {
           name: formData.companyName,
-          email: formData.email,
+          email: loggedInUser.email,
           contact: formData.phone,
         },
         handler: async (response: any) => {
@@ -196,6 +201,15 @@ export function CheckoutPage({
   };
 
   useEffect(() => {
+    if (!loggedInUser?.email) return;
+
+    setFormData(prev => ({
+      ...prev,
+      email: loggedInUser.email, // 🔒 ONLY EMAIL
+    }));
+  }, [loggedInUser?.email]);
+
+  useEffect(() => {
     const loadPlanFromLMS = async () => {
       try {
         const res = await fetch(
@@ -219,6 +233,7 @@ export function CheckoutPage({
 
         setLmsPlan({
           licenseId: matched._id,
+           planName: matched.licenseType.name, 
           monthlyPrice: matched.licenseType.price.amount,
         });
       } catch (err) {
@@ -232,6 +247,9 @@ export function CheckoutPage({
   }, [selectedPlan]);
 
   if (loading || !lmsPlan) return null;
+
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-background py-12">
@@ -284,9 +302,10 @@ export function CheckoutPage({
                           type="email"
                           placeholder="company@example.com"
                           value={formData.email}
-                          onChange={(e) => handleInputChange('email', e.target.value)}
-                          className="pl-10"
-                          required
+                           readOnly
+                          // onChange={(e) => handleInputChange('email', e.target.value)}
+                          className="pl-10 bg-muted cursor-not-allowed"
+                         // required
                         />
                       </div>
                     </div>
@@ -386,7 +405,9 @@ export function CheckoutPage({
                 <div>
                   <p className="text-sm text-muted-foreground mb-2">Selected Plan</p>
                   <div className="flex items-center justify-between">
-                    <span>{selectedPlan}</span>
+                    <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 
+                 text-blue-700 dark:text-blue-300 
+                 rounded-full text-sm">{lmsPlan.planName}</span>
                     <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-sm">
                       {getBillingText()}
                     </span>
