@@ -118,6 +118,7 @@ export function CheckoutPage({
         userId,
         licenseId: lmsPlan.licenseId,
         billingCycle,
+        amount: getTotal() * 100,
       });
 
       if (!order?.orderId) {
