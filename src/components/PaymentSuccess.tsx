@@ -4,6 +4,7 @@ import { CheckCircle2, Download, ArrowRight } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getTransactionDetails, downloadInvoice } from "../api/payment";
+import { useNavigate } from "react-router-dom";
 
 export function PaymentSuccess() {
   const [params] = useSearchParams();
@@ -11,6 +12,8 @@ export function PaymentSuccess() {
 
   const [loading, setLoading] = useState(true);
   const [transaction, setTransaction] = useState<any>(null);
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     if (!transactionId) return;
@@ -137,7 +140,7 @@ export function PaymentSuccess() {
                 Download Invoice
               </Button>
 
-              <Button
+              {/* <Button
                 size="lg"
                 className="w-full"
                 onClick={() =>
@@ -146,7 +149,17 @@ export function PaymentSuccess() {
               >
                 Go to Dashboard
                 <ArrowRight className="h-4 w-4 ml-2" />
+              </Button> */}
+
+              <Button
+                size="lg"
+                className="w-full"
+                onClick={() => navigate("/tutorials")}
+              >
+                Start Tutorial
+                <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
+
             </div>
 
             <div className="pt-6 border-t text-xs text-muted-foreground">

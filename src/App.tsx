@@ -26,6 +26,7 @@ import { CookiePolicy } from "./components/pages/CookiePolicy";
 import { Security } from "./components/pages/Security";
 
 import { Toaster } from "./components/ui/sonner";
+import TutorialPage from './components/TutorialPage';
 
 type BillingCycle = "monthly" | "quarterly" | "yearly";
 
@@ -59,6 +60,11 @@ function SectionRedirect({ sectionId }: { sectionId: string }) {
 
 export default function App() {
   const navigate = useNavigate();
+  const location = useLocation(); // ✅ REQUIRED
+
+  const hideHeader =
+    location.pathname === "/tutorials" ||
+    location.pathname.startsWith("/checkout");
 
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("");
@@ -138,9 +144,12 @@ export default function App() {
     </>
   );
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Header onLoginClick={() => setLoginModalOpen(true)} />
+      return (
+        <div className="min-h-screen bg-background">
+          {!hideHeader && (
+  <Header onLoginClick={() => setLoginModalOpen(true)} />
+)}
+
 
       <Routes>
         {/* Default */}
@@ -155,6 +164,8 @@ export default function App() {
         <Route path="/features" element={<SectionRedirect sectionId="features" />} />
         <Route path="/product" element={<SectionRedirect sectionId="product" />} />
         <Route path="/why-us" element={<SectionRedirect sectionId="why-us" />} />
+
+        <Route path="/tutorials" element={<TutorialPage />} />
 
         {/* Real pages */}
         <Route
