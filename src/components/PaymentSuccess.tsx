@@ -140,17 +140,6 @@ export function PaymentSuccess() {
                 Download Invoice
               </Button>
 
-              {/* <Button
-                size="lg"
-                className="w-full"
-                onClick={() =>
-                  window.location.href = "https://geo-track-em3s.onrender.com/dashboard"
-                }
-              >
-                Go to Dashboard
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button> */}
-
               <Button
                 size="lg"
                 className="w-full"
