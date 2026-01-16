@@ -96,7 +96,7 @@ export function LoginModal({ open, onOpenChange, onAdminLogin, onLoginSuccess }:
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Login to Trackon</DialogTitle>
+          <DialogTitle>Login to GeoTrack</DialogTitle>
           <DialogDescription>
             Sign in to continue
           </DialogDescription>
@@ -104,7 +104,6 @@ export function LoginModal({ open, onOpenChange, onAdminLogin, onLoginSuccess }:
 
         <Card>
           <CardHeader>
-            <CardTitle>Admin Portal</CardTitle>
             <CardDescription>
               Enter your credentials to continue
             </CardDescription>
@@ -169,7 +168,7 @@ export function LoginModal({ open, onOpenChange, onAdminLogin, onLoginSuccess }:
               </div>
               <Button type="submit" className="w-full">
                 <ShieldCheck className="h-4 w-4 mr-2" />
-                Sign In as Admin
+                Sign In 
               </Button>
             </form>
           </CardContent>

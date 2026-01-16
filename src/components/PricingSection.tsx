@@ -31,6 +31,7 @@ interface Plan {
   }[];
   popular: boolean;
   isFree: boolean;
+  isEnterprise: boolean;
   icon: any;
 }
 
@@ -106,6 +107,7 @@ export function PricingSection({ onPlanSelect }: PricingSectionProps) {
             features: lt.features || [],
             popular: meta.popular ?? false,
             isFree: lt.price.amount === 0,
+            isEnterprise: lt.name.toLowerCase() === "enterprise",
             icon: meta.icon || Star,
           };
         });
@@ -223,13 +225,28 @@ export function PricingSection({ onPlanSelect }: PricingSectionProps) {
                 <CardContent className="space-y-6">
                   <Button
                     className="w-full"
-                    variant={plan.popular ? "default" : "outline"}
-                    onClick={() =>
-                      onPlanSelect(plan.licenseType, billingCycle)
+                    variant={
+                      plan.isEnterprise
+                        ? "secondary"
+                        : plan.popular
+                        ? "default"
+                        : "outline"
                     }
+                    onClick={() => {
+                      if (plan.isEnterprise) {
+                        window.location.href = "/contact-sales";
+                        return;
+                      }
+                      onPlanSelect(plan.licenseType, billingCycle);
+                    }}
                   >
-                    {plan.isFree ? "Get Started Free" : "Buy Now"}
+                    {plan.isFree
+                      ? "Get Started Free"
+                      : plan.isEnterprise
+                      ? "Contact Sales"
+                      : "Buy Now"}
                   </Button>
+
 
                   <div className="space-y-3">
                     <p className="text-sm">Includes:</p>

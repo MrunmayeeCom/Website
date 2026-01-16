@@ -156,10 +156,10 @@ export function PaymentSuccess() {
               <p>
                 Questions? Email{" "}
                 <a
-                  href="mailto:support@trackon.com"
+                  href="mailto:support@geotrack.com"
                   className="text-blue-600 hover:underline"
                 >
-                  support@trackon.com
+                  support@geotrack.com
                 </a>
               </p>
             </div>
