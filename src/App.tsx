@@ -28,7 +28,7 @@ import { Security } from "./components/pages/Security";
 import { Toaster } from "./components/ui/sonner";
 import TutorialPage from './components/TutorialPage';
 
-type BillingCycle = "monthly" | "quarterly" | "yearly";
+type BillingCycle = "monthly" | "quarterly" | "half-yearly" | "yearly";
 
 /* ---------------- SCROLL HANDLER ---------------- */
 
@@ -36,7 +36,7 @@ function SectionRedirect({ sectionId }: { sectionId: string }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    navigate("/home", { replace: true });
+    navigate("/", { replace: true });
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -152,11 +152,9 @@ export default function App() {
 
 
       <Routes>
-        {/* Default */}
-        <Route path="/" element={<Navigate to="/home" replace />} />
 
         {/* Main page */}
-        <Route path="/home" element={<HomePage />} />
+        <Route path="/" element={<HomePage />} />
 
         {/* 🔥 SEO-friendly virtual routes */}
         <Route path="/pricing" element={<SectionRedirect sectionId="pricing" />} />
@@ -174,7 +172,7 @@ export default function App() {
             <CheckoutPage
               selectedPlan={selectedPlan}
               initialBillingCycle={billingCycle}
-              onBack={() => navigate("/home")}
+              onBack={() => navigate("/")}
               onProceedToPayment={handleProceedToPayment}
             />
           }
@@ -185,13 +183,13 @@ export default function App() {
           element={<PaymentSuccess />}
         />
 
-        <Route path="/privacy" element={<PrivacyPolicy onBack={() => navigate("/home")} />} />
-        <Route path="/terms" element={<TermsOfService onBack={() => navigate("/home")} />} />
-        <Route path="/cookies" element={<CookiePolicy onBack={() => navigate("/home")} />} />
-        <Route path="/security" element={<Security onBack={() => navigate("/home")} />} />
+        <Route path="/privacy" element={<PrivacyPolicy onBack={() => navigate("/")} />} />
+        <Route path="/terms" element={<TermsOfService onBack={() => navigate("/")} />} />
+        <Route path="/cookies" element={<CookiePolicy onBack={() => navigate("/")} />} />
+        <Route path="/security" element={<Security onBack={() => navigate("/")} />} />
 
         {/* Fallback */}
-        <Route path="*" element={<Navigate to="/home" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
 

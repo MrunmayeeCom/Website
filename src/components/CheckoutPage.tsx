@@ -13,15 +13,14 @@ import { checkCustomerExists, syncCustomer } from "../api/customerSync";
 import { loadRazorpay } from "../utils/loadRazorpay"
 import { getStoredUser } from "../api/auth";
 
-
-type BillingCycle = "monthly" | "quarterly" | "yearly";
+type BillingCycle = "monthly" | "quarterly" | "half-yearly" | "yearly";
 
 interface CheckoutPageProps {
   selectedPlan: string;
-  initialBillingCycle: "monthly" | "quarterly" | "yearly";
+  initialBillingCycle: "monthly" | "quarterly" | "half-yearly" | "yearly";
   onBack: () => void;
   onProceedToPayment: (
-    billingCycle: "monthly" | "quarterly" | "yearly",
+    billingCycle: "monthly" | "quarterly" | "half-yearly" | "yearly",
     formData: any
   ) => void;
 }
@@ -48,6 +47,8 @@ export function CheckoutPage({
     gstNumber: "",
   });
 
+  const [submitting, setSubmitting] = useState(false);
+
   const [lmsPlan, setLmsPlan] = useState<{
     licenseId: string;
     planName: string;   
@@ -60,11 +61,12 @@ export function CheckoutPage({
     if (!lmsPlan) return 0;
     const base = lmsPlan.monthlyPrice;
     if (billingCycle === "monthly") return base;
-    if (billingCycle === "quarterly") return base * 3 * 0.9;
-    return base * 12 * 0.8;
+    if (billingCycle === "quarterly") return (base * 3 * 0.95); // 5% discount
+    if (billingCycle === "half-yearly") return (base * 6 * 0.90); // 10% discount
+    return (base * 12 * 0.80); // 20% discount
   };
 
-  const getTax = () => getPrice() * 0.18;
+  const getTax = () => Math.round(getPrice() * 0.18);
   const getTotal = () => getPrice() + getTax();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -76,7 +78,11 @@ export function CheckoutPage({
     }
 
     try {
-      const backendBillingCycle = billingCycle === "quarterly" ? "monthly" : billingCycle;
+      // Map UI billing cycles to backend billing cycles
+      const backendBillingCycle = 
+        billingCycle === "quarterly" || billingCycle === "half-yearly" 
+          ? "monthly" 
+          : billingCycle;
 
       const exists = await checkCustomerExists(loggedInUser.email);
       if (!exists) {
@@ -98,7 +104,7 @@ export function CheckoutPage({
         });
 
         alert("Free plan activated successfully 🎉");
-        window.location.replace("https://geo-track-em3s.onrender.com");
+        window.location.href = "/payment-success?free=true";
         return;
       }
 
@@ -188,6 +194,7 @@ export function CheckoutPage({
     switch (billingCycle) {
       case "monthly": return "Monthly";
       case "quarterly": return "Quarterly";
+      case "half-yearly": return "Half-Yearly";
       case "yearly": return "Yearly";
     }
   };
@@ -195,7 +202,8 @@ export function CheckoutPage({
   const getSavingsPercent = () => {
     switch (billingCycle) {
       case "monthly": return 0;
-      case "quarterly": return 10;
+      case "quarterly": return 5;
+      case "half-yearly": return 10;
       case "yearly": return 20;
     }
   };
@@ -205,7 +213,7 @@ export function CheckoutPage({
 
     setFormData(prev => ({
       ...prev,
-      email: loggedInUser.email, // 🔒 ONLY EMAIL
+      email: loggedInUser.email,
     }));
   }, [loggedInUser?.email]);
 
@@ -233,7 +241,7 @@ export function CheckoutPage({
 
         setLmsPlan({
           licenseId: matched._id,
-           planName: matched.licenseType.name, 
+          planName: matched.licenseType.name, 
           monthlyPrice: matched.licenseType.price.amount,
         });
       } catch (err) {
@@ -247,9 +255,6 @@ export function CheckoutPage({
   }, [selectedPlan]);
 
   if (loading || !lmsPlan) return null;
-
-
-
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-background py-12">
@@ -302,10 +307,8 @@ export function CheckoutPage({
                           type="email"
                           placeholder="company@example.com"
                           value={formData.email}
-                           readOnly
-                          // onChange={(e) => handleInputChange('email', e.target.value)}
+                          readOnly
                           className="pl-10 bg-muted cursor-not-allowed"
-                         // required
                         />
                       </div>
                     </div>
@@ -417,10 +420,16 @@ export function CheckoutPage({
                 <div>
                   <p className="text-sm text-muted-foreground mb-3">Billing Cycle</p>
                   <Tabs value={billingCycle} onValueChange={(value : BillingCycle) => setBillingCycle(value as BillingCycle)}>
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="monthly" className="text-xs">Monthly</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-4">
+                      <TabsTrigger value="monthly" className="text-xs">
+                        Monthly
+                      </TabsTrigger>
                       <TabsTrigger value="quarterly" className="text-xs">
                         Quarterly
+                        <span className="ml-1 text-[10px] text-green-600 dark:text-green-400">-5%</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="half-yearly" className="text-xs">
+                        Half-Yearly
                         <span className="ml-1 text-[10px] text-green-600 dark:text-green-400">-10%</span>
                       </TabsTrigger>
                       <TabsTrigger value="yearly" className="text-xs">
@@ -436,11 +445,11 @@ export function CheckoutPage({
                 <div className="space-y-3">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Plan Price</span>
-                    <span>₹{getPrice().toLocaleString()}</span>
+                    <span>₹{getPrice().toLocaleString('en-IN')}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">GST (18%)</span>
-                    <span>₹{getTax().toLocaleString()}</span>
+                    <span>₹{getTax().toLocaleString('en-IN')}</span>
                   </div>
                   {getSavingsPercent() > 0 && (
                     <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
@@ -454,7 +463,7 @@ export function CheckoutPage({
 
                 <div className="flex justify-between items-baseline">
                   <span>Total Amount</span>
-                  <span className="text-2xl">₹{getTotal().toLocaleString()}</span>
+                  <span className="text-2xl">₹{getTotal().toLocaleString('en-IN')}</span>
                 </div>
 
                 <div className="space-y-2 text-xs text-muted-foreground">
