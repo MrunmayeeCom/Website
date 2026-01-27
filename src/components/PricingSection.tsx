@@ -88,7 +88,7 @@ export function PricingSection({ onPlanSelect }: PricingSectionProps) {
     const loadGeoTrackPlans = async () => {
       try {
         const res = await fetch(
-          "https://lisence-system.onrender.com/api/license/licenses-by-product/69589d3ba7306459dd47fd87",
+          "http://localhost:4000/api/license/public/licenses-by-product/69589d3ba7306459dd47fd87",
           {
             headers: { "x-api-key": "my-secret-key-123" },
           }
