@@ -259,7 +259,7 @@ export function CheckoutPage({
     const loadPlanFromLMS = async () => {
       try {
         const res = await fetch(
-          "http://localhost:4000/api/license/public/licenses-by-product/69589d3ba7306459dd47fd87",
+          "https://lisence-system.onrender.com/api/license/public/licenses-by-product/69589d3ba7306459dd47fd87",
           {
             headers: {
               "x-api-key": "my-secret-key-123",

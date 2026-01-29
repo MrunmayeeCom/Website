@@ -24,6 +24,8 @@ import { PrivacyPolicy } from "./components/pages/PrivacyPolicy";
 import { TermsOfService } from "./components/pages/TermsOfService";
 import { CookiePolicy } from "./components/pages/CookiePolicy";
 import { Security } from "./components/pages/Security";
+import { PartnerPage } from "./components/pages/PartnerPage";
+import { BecomePartnerPage } from "./components/pages/BecomePartnerPage";
 
 import { Toaster } from "./components/ui/sonner";
 import TutorialPage from './components/TutorialPage';
@@ -135,9 +137,6 @@ export default function App() {
           <FAQSection />
         </section>
 
-        <section id="use-cases">
-          <UseCasesSection onGetStartedClick={handleGetStartedClick} />
-        </section>
       </main>
 
       <Footer onNavigate={handleFooterNavigate} />
@@ -190,6 +189,26 @@ export default function App() {
         <Route path="/terms" element={<TermsOfService onBack={() => navigate("/")} />} />
         <Route path="/cookies" element={<CookiePolicy onBack={() => navigate("/")} />} />
         <Route path="/security" element={<Security onBack={() => navigate("/")} />} />
+
+        {/* <Route
+          path="/partners"
+          element={
+            <>
+              <PartnerPage onBecomePartnerClick={() => navigate("/become-partner")} />
+              <Footer onNavigate={handleFooterNavigate} />
+            </>
+          }
+        />
+
+        <Route
+          path="/become-partner"
+          element={
+            <>
+              <BecomePartnerPage onBackToDirectory={() => navigate("/partners")} />
+              <Footer onNavigate={handleFooterNavigate} />
+            </>
+          }
+        /> */}
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
