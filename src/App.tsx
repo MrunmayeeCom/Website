@@ -190,7 +190,7 @@ export default function App() {
         <Route path="/cookies" element={<CookiePolicy onBack={() => navigate("/")} />} />
         <Route path="/security" element={<Security onBack={() => navigate("/")} />} />
 
-        {/* <Route
+         <Route
           path="/partners"
           element={
             <>
@@ -208,7 +208,7 @@ export default function App() {
               <Footer onNavigate={handleFooterNavigate} />
             </>
           }
-        /> */}
+        /> 
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
