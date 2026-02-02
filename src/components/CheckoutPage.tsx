@@ -279,14 +279,10 @@ export function CheckoutPage({
 
         console.log("📦 Matched License:", matched);
         console.log("🎯 License Type:", matched.licenseType);
-        // console.log("✨ Raw Features:", matched.licenseType.features);
         
         // Extract user count from features
         let userCount = 1; // Default fallback
         const rawFeatures = matched.licenseType.features || [];
-
-        // console.log("🔍 Raw features type:", typeof rawFeatures, "isArray:", Array.isArray(rawFeatures));
-        // console.log("🔍 Features keys:", Object.keys(rawFeatures));
         
         // The API might return features in the enriched format from buildLicenseFeaturesForUI
         // or in the raw validatedFeatureMap format
@@ -307,15 +303,6 @@ export function CheckoutPage({
               const key = (feature.featureKey || "").toLowerCase();
               const slug = (feature.featureSlug || "").toLowerCase();
               const value = feature.limitValue ?? feature.value;
-              
-              // console.log("🔍 Checking feature:", { 
-              //   label, 
-              //   key, 
-              //   slug, 
-              //   type: feature.featureType, 
-              //   value: value,
-              //   displayName: feature.displayName 
-              // });
               
               // Look for user-specific features with specific keywords
               if (feature.featureType === "limit" && typeof value === "number") {
