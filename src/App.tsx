@@ -24,11 +24,13 @@ import { PrivacyPolicy } from "./components/pages/PrivacyPolicy";
 import { TermsOfService } from "./components/pages/TermsOfService";
 import { CookiePolicy } from "./components/pages/CookiePolicy";
 import { Security } from "./components/pages/Security";
+import { PartnerPage } from "./components/pages/PartnerPage";
+import { BecomePartnerPage } from "./components/pages/BecomePartnerPage";
 
 import { Toaster } from "./components/ui/sonner";
 import TutorialPage from './components/TutorialPage';
 
-type BillingCycle = "monthly" | "quarterly" | "yearly";
+type BillingCycle = "monthly" | "quarterly" | "half-yearly" | "yearly";
 
 /* ---------------- SCROLL HANDLER ---------------- */
 
@@ -36,7 +38,7 @@ function SectionRedirect({ sectionId }: { sectionId: string }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    navigate("/home", { replace: true });
+    navigate("/", { replace: true });
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -135,9 +137,6 @@ export default function App() {
           <FAQSection />
         </section>
 
-        <section id="use-cases">
-          <UseCasesSection onGetStartedClick={handleGetStartedClick} />
-        </section>
       </main>
 
       <Footer onNavigate={handleFooterNavigate} />
@@ -147,16 +146,17 @@ export default function App() {
       return (
         <div className="min-h-screen bg-background">
           {!hideHeader && (
-  <Header onLoginClick={() => setLoginModalOpen(true)} />
+  <Header
+  onLoginClick={() => setLoginModalOpen(true)}
+  onNavigateToPartners={() => navigate("/partners")}
+/>
 )}
 
 
       <Routes>
-        {/* Default */}
-        <Route path="/" element={<Navigate to="/home" replace />} />
 
         {/* Main page */}
-        <Route path="/home" element={<HomePage />} />
+        <Route path="/" element={<HomePage />} />
 
         {/* 🔥 SEO-friendly virtual routes */}
         <Route path="/pricing" element={<SectionRedirect sectionId="pricing" />} />
@@ -174,7 +174,7 @@ export default function App() {
             <CheckoutPage
               selectedPlan={selectedPlan}
               initialBillingCycle={billingCycle}
-              onBack={() => navigate("/home")}
+              onBack={() => navigate("/")}
               onProceedToPayment={handleProceedToPayment}
             />
           }
@@ -185,13 +185,33 @@ export default function App() {
           element={<PaymentSuccess />}
         />
 
-        <Route path="/privacy" element={<PrivacyPolicy onBack={() => navigate("/home")} />} />
-        <Route path="/terms" element={<TermsOfService onBack={() => navigate("/home")} />} />
-        <Route path="/cookies" element={<CookiePolicy onBack={() => navigate("/home")} />} />
-        <Route path="/security" element={<Security onBack={() => navigate("/home")} />} />
+        <Route path="/privacy" element={<PrivacyPolicy onBack={() => navigate("/")} />} />
+        <Route path="/terms" element={<TermsOfService onBack={() => navigate("/")} />} />
+        <Route path="/cookies" element={<CookiePolicy onBack={() => navigate("/")} />} />
+        <Route path="/security" element={<Security onBack={() => navigate("/")} />} />
+
+         <Route
+          path="/partners"
+          element={
+            <>
+              <PartnerPage onBecomePartnerClick={() => navigate("/become-partner")} />
+              <Footer onNavigate={handleFooterNavigate} />
+            </>
+          }
+        />
+
+        <Route
+          path="/become-partner"
+          element={
+            <>
+              <BecomePartnerPage onBackToDirectory={() => navigate("/partners")} />
+              <Footer onNavigate={handleFooterNavigate} />
+            </>
+          }
+        /> 
 
         {/* Fallback */}
-        <Route path="*" element={<Navigate to="/home" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
 

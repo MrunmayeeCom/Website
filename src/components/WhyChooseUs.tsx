@@ -9,7 +9,7 @@ export function WhyChooseUs() {
     },
     {
       title: "Seamless Tally Integration",
-      description: "Bidirectional sync with Tally ERP, bulk import clients, automatic duplicate detection and removal for clean data."
+      description: "Bidirectional sync with Tally Prime, bulk import clients, automatic duplicate detection and removal for clean data."
     },
     {
       title: "Real-Time GPS Tracking",
@@ -46,11 +46,11 @@ export function WhyChooseUs() {
             Why Choose Us
           </div>
           <h2 className="text-3xl md:text-4xl mb-4 text-primary">
-            Why Choose WorkTrack Pro?
+            Why Choose GeoTrack?
           </h2>
           <p className="text-lg text-muted-foreground">
             We provide the most comprehensive, accurate, and intelligent field sales tracking 
-            solution with unique pincode-based filtering and seamless Tally integration.
+            solution with unique pincode-based filtering and seamless Tally Prime integration.
           </p>
         </div>
 

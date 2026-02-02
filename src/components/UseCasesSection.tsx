@@ -17,7 +17,7 @@ export function UseCasesSection({ onGetStartedClick }: UseCasesSectionProps) {
         "Multi-region pincode filtering",
         "10,000+ client capacity",
         "Team performance analytics",
-        "Tally ERP bulk sync"
+        "Tally Prime bulk sync"
       ]
     },
     {
@@ -80,7 +80,7 @@ export function UseCasesSection({ onGetStartedClick }: UseCasesSectionProps) {
           </h2>
           <p className="text-lg text-muted-foreground">
             Whether you're managing pharmaceutical reps, FMCG distributors, or service teams, 
-            WorkTrack Pro adapts to your unique field sales and client management needs.
+            GeoTrack adapts to your unique field sales and client management needs.
           </p>
         </div>
 

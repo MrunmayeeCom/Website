@@ -32,7 +32,7 @@ export function HeroSection({ onGetStartedClick, onContactSalesClick }: HeroSect
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl animate-fade-in-up" style={{ animationDelay: '200ms' }}>
               Streamline operations, boost productivity, and scale faster with 
-              WorkTrack Pro and Tally Integration — trusted by SMEs and enterprises 
+              GeoTrack and Tally Prime Integration — trusted by SMEs and enterprises 
               across industries.
             </p>
             <div className="flex flex-wrap gap-4 animate-fade-in-up" style={{ animationDelay: '400ms' }}>

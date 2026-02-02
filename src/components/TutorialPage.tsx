@@ -18,7 +18,8 @@ import {
   Route,
   Activity,
 } from 'lucide-react';
-import { motion } from 'motion/react';
+// import { motion } from 'motion/react';
+import { motion } from "framer-motion";
 
 
 import geotrack from "../assets/geotrack.png";
@@ -54,7 +55,7 @@ import { Footer} from './Footer';
 const tutorialSections = [
   {
     sectionId: 1,
-    sectionTitle: '🎯 Sign-In & Account Creation',
+    sectionTitle: '🎯 1. Sign-In & Account Creation',
     sectionDescription: 'Get started by creating your account and setting up your profile',
     steps: [
       {
@@ -106,11 +107,11 @@ const tutorialSections = [
   },
   {
     sectionId: 2,
-    sectionTitle: '🔑 Permission Setup',
+    sectionTitle: '🔑 2. Permission Setup',
     sectionDescription: 'Allow necessary permissions for seamless app functionality',
     steps: [
       {
-        number: 5,
+        number: 4,
         title: 'Allow Required Services',
         description: 'To ensure smooth functioning, allow the following permissions:',
         details: [
@@ -132,11 +133,11 @@ const tutorialSections = [
   },
   {
     sectionId: 3,
-    sectionTitle: '🗺️ Map Screen & Client Tracking',
+    sectionTitle: '🗺️ 3.Map Screen & Client Tracking',
     sectionDescription: 'View your location and track nearby clients on the map',
     steps: [
       {
-        number: 6,
+        number: 5,
         title: 'View Your Location & Nearby Clients',
         description: 'The map displays your current location. Nearby clients are shown using colored markers.',
         details: [
@@ -148,7 +149,7 @@ const tutorialSections = [
         image: map_screen,
       },
       {
-        number: 7,
+        number: 6,
         title: 'Click on Client Marker',
         description: 'On tapping a client marker, you can view client details and start a meeting with the client.',
         icon: Navigation,
@@ -159,11 +160,11 @@ const tutorialSections = [
   },
   {
     sectionId: 4,
-    sectionTitle: '💼 Meeting Management',
+    sectionTitle: '💼 4. Meeting Management',
     sectionDescription: 'Start, manage, and complete client meetings efficiently',
     steps: [
       {
-        number: 8,
+        number: 7,
         title: 'Start Meeting',
         description: 'When Start Meeting is selected, view client location, phone number, meeting start time & duration.',
         details: [
@@ -176,7 +177,7 @@ const tutorialSections = [
         image: meeting_details,
       },
       {
-        number: 9,
+        number: 8,
         title: 'During the Meeting',
         description: 'Add meeting notes, attach documents, images, or files, and update meeting outcomes in real time.',
         icon: FileText,
@@ -184,7 +185,7 @@ const tutorialSections = [
         image: meeting_notes,
       },
       {
-        number: 10,
+        number: 9,
         title: 'End Meeting',
         description: 'Tap End Meeting. Client status automatically updates from Active → Inactive/Completed. Notes and attachments are securely saved.',
         icon: CheckCircle2,
@@ -195,11 +196,11 @@ const tutorialSections = [
   },
   {
     sectionId: 5,
-    sectionTitle: '👤 Client Detail View',
+    sectionTitle: '👤 5. Client Detail View',
     sectionDescription: 'Access complete client information and history',
     steps: [
       {
-        number: 11,
+        number: 10,
         title: 'View Client Details',
         description: 'From the client screen or map, view client status, last visited date & history, contact information (Email, Address, Coordinates), meeting notes & attachments, and client location highlighted on the map.',
         icon: UserCircle,
@@ -210,11 +211,11 @@ const tutorialSections = [
   },
   {
     sectionId: 6,
-    sectionTitle: '🚗 Trip & Expense Management',
+    sectionTitle: '🚗 6. Trip & Expense Management',
     sectionDescription: 'Track your trips and manage expenses efficiently',
     steps: [
       {
-        number: 12,
+        number: 11,
         title: 'Choose Trip Type',
         description: 'Select between Single Trip (one-way journey, single transport mode) or Multi-Leg Trip (multiple journeys, different transport modes in one trip).',
         icon: Route,
@@ -222,7 +223,7 @@ const tutorialSections = [
         image: trip_details
       },
      {
-        number: 13,
+        number: 12,
         title: 'Single Trip Entry',
         description: 'Fill in start location, end location, date & time, distance, transport mode (Bus/Train/Bike/Rickshaw), expense details, and upload receipts.',
         details: [
@@ -239,7 +240,7 @@ const tutorialSections = [
         images: [single_leg_1, single_leg_2, single_leg_3],
       },
       {
-        number: 14,
+        number: 13,
         title: 'Multi-Leg Trip Entry',
         description: 'Enter trip name, multiple journey legs with start/end location, distance, transport mode, amount spent, notes, and attach receipts. View total legs, distance, and expense amount.',
         icon: CreditCard,
@@ -251,11 +252,11 @@ const tutorialSections = [
   },
   {
     sectionId: 7, 
-    sectionTitle: '📍 Client Marker Status on Map',
+    sectionTitle: '📍 7. Client Marker Status on Map',
     sectionDescription: 'Client markers on map indicate visit status and priority.',
     steps: [
       {
-        number: 15,
+        number: 14,
         title: 'Client Marker Status on Map',
         description: 'Client markers on map indicate visit status and priority.',
         details: [
@@ -276,7 +277,7 @@ const tutorialSections = [
     sectionDescription: 'Manage and organize all your clients in one place',
     steps: [
       {
-        number: 16,
+        number: 15,
         title: 'View All Clients',
         description: 'Clients are categorized as All, Active, Inactive, and Completed. Search by name, sort by distance, and filter by status.',
         details: [
@@ -290,7 +291,7 @@ const tutorialSections = [
         image: client_screen,
       },
       {
-        number: 17,
+        number: 16,
         title: 'Add New Client',
         description: 'Tap Add Client and choose Quick Fill (scan business card to auto-populate) or Manual Entry (client name, phone, email, address, pincode, notes).',
         icon: UserPlus,
@@ -301,11 +302,11 @@ const tutorialSections = [
   },
   {
     sectionId: 9,
-    sectionTitle: '📈 Activity Screen',
+    sectionTitle: '📈 9. Activity Screen',
     sectionDescription: 'Track all your activities and movements',
     steps: [
       {
-        number: 18,
+        number: 17,
         title: 'View Activity Logs',
         description: 'Displays total number of activities, date & time, latitude & longitude, location coordinates, and distance traveled.',
         icon: Activity,
@@ -316,11 +317,11 @@ const tutorialSections = [
   },
   {
     sectionId: 10,
-    sectionTitle: '⚙️ Profile & Settings',
+    sectionTitle: '⚙️ 10. Profile & Settings',
     sectionDescription: 'Manage your account preferences and information',
     steps: [
       {
-        number: 19,
+        number: 18,
         title: 'Profile Information',
         description: 'View & edit profile name, User/Employee ID, and view total expenses incurred.',
         icon: UserCircle,
@@ -328,7 +329,7 @@ const tutorialSections = [
         image: profile_screen,
       },
       {
-        number: 20,
+        number: 19,
         title: 'Account Settings',
         description: 'Enable/disable background location tracking, view registered email and member since date. Tap Sign Out to exit the app securely.',
         icon: Settings,
@@ -341,6 +342,8 @@ const tutorialSections = [
 export default function TutorialPage() {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [activeImageIndex, setActiveImageIndex] = useState<{ [key: number]: number }>({});
+  const [popupSide, setPopupSide] = useState('right');
+
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -609,25 +612,25 @@ export default function TutorialPage() {
 <section style={{ padding: '3rem 1rem' }}>
   <div style={{ maxWidth: '90rem', margin: '0 auto' }}>
     {tutorialSections.map((section) => (
-      <div key={section.sectionId} style={{ marginBottom: '4rem' }}>
+      <div key={section.sectionId} style={{ marginBottom: '2rem' }}>
         <h3 style={{ fontSize: '1.9rem', fontWeight: 800, color: '#1e293b' }}>
           {section.sectionTitle}
         </h3>
-        <p style={{ color: '#475569', marginBottom: '2.5rem' }}>
+        <p style={{ color: '#475569', marginBottom: '1.5rem' }}>
           {section.sectionDescription}
         </p>
 
         <div
   style={{
     display: 'flex',
-    columnGap: '28rem',
-    rowGap: '4rem',
+    gap:  '6rem',
     flexWrap: 'wrap',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
     paddingTop: '2rem',
+    paddingInline: '6rem', 
   }}
 >
-  {section.steps.map((step) => {
+  {section.steps.map((step, stepIndex) => {
     const Icon = step.icon;
     const isHovered = hoveredCard === step.number;
 
@@ -641,12 +644,30 @@ export default function TutorialPage() {
         onMouseLeave={() => setHoveredCard(null)}
         style={{
           position: 'relative',
-          width: '320px',
+          width: '340px',
           perspective: '1200px',
           margin: '0 auto',
         }}
       >
-        {/* 📱 3D MOBILE MOCKUP */}
+        {/* Staggered Animation Wrapper */}
+        <motion.div
+          initial={{ opacity: 0, y: 60, scale: 0.9 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ 
+            duration: 0.7, 
+            delay: (stepIndex * 0.12),
+            ease: [0.25, 0.46, 0.45, 0.94]
+          }}
+          viewport={{ once: false, margin: '-80px', amount: 0.3 }}
+          style={{ height: '100%' }}
+        >
+          {/* 🔥 ADD THIS WRAPPER HERE */}
+<div
+  style={{
+    position: 'relative',
+    overflow: 'visible',
+  }}
+></div>
         <motion.div
           animate={{
             rotateY: isHovered ? -8 : 0,
@@ -655,13 +676,13 @@ export default function TutorialPage() {
           }}
           transition={{ type: 'spring', stiffness: 120, damping: 12 }}
           style={{
-            borderRadius: '3rem',
-            overflow: 'hidden',
-            boxShadow: isHovered
-              ? '0 40px 80px rgba(0,0,0,0.55)'
-              : '0 25px 50px rgba(0,0,0,0.35)',
-            background: '#000',
-            border: '8px solid #000',
+            borderRadius: 0,
+            overflow: 'visible',
+            boxShadow: 'none',
+              //? '0 40px 80px rgba(0,0,0,0.55)'
+              //: '0 25px 50px rgba(0,0,0,0.35)',
+            //background: '#000',
+            //border: '8px solid #000',
           }}
         >
           <motion.img
@@ -674,59 +695,13 @@ export default function TutorialPage() {
             transition={{ duration: 0.5, ease: 'easeInOut' }}
             style={{
               width: '100%',
-              height: '520px',
+              height: '680px',
               objectFit: 'cover',
               background: 'transparent',
               display: 'block',
             }}
           />
-        {/* Carousel Navigation Dots */}
-          {step.multiImages && images.length > 1 && (
-            <div
-              style={{
-                position: 'absolute',
-                bottom: '1rem',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                display: 'flex',
-                gap: '0.5rem',
-                zIndex: 10,
-                background: 'rgba(0, 0, 0, 0.3)',
-                padding: '0.5rem 0.75rem',
-                borderRadius: '1rem',
-                backdropFilter: 'blur(4px)',
-              }}
-            >
-              {images.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveImageIndex({ ...activeImageIndex, [step.number]: idx });
-                  }}
-                  style={{
-                    width: (activeImageIndex[step.number] ?? 0) === idx ? '2rem' : '0.5rem',
-                    height: '0.5rem',
-                    borderRadius: '0.25rem',
-                    background: (activeImageIndex[step.number] ?? 0) === idx ? 'rgb(6, 182, 212)' : 'rgba(255, 255, 255, 0.5)',
-                    border: 'none',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s',
-                  }}
-                  onMouseEnter={(e) => {
-                    if ((activeImageIndex[step.number] ?? 0) !== idx) {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.8)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if ((activeImageIndex[step.number] ?? 0) !== idx) {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.5)';
-                    }
-                  }}
-                />
-              ))}
-            </div>
-          )}
+        {/* Carousel Navigation Dots - Removed, now fully automatic */}
         </motion.div>
 
 
@@ -737,23 +712,44 @@ export default function TutorialPage() {
             animate={{ opacity: 1, x: 0, scale: 1 }}
             transition={{ duration: 0.25 }}
             style={{
-              position: 'absolute',
+              position: 'fixed',
               top: '50%',
-              left: 'calc(100% + 1.5rem)',
-              transform: 'translateY(-50%)',
-              width: '280px',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '320px',
               background: 'rgba(15, 23, 42, 0.95)',
               backdropFilter: 'blur(12px)',
               borderRadius: '1.25rem',
               padding: '1.5rem',
               boxShadow: '0 30px 60px rgba(0,0,0,0.6)',
               color: 'white',
-              zIndex: 20,
+              zIndex: 99999,
               pointerEvents: 'none',
               whiteSpace: 'normal',
               wordWrap: 'break-word',
             }}
           >
+            {/* 🔢 STEP NUMBER BADGE */}
+    <div
+      style={{
+        position: 'absolute',
+        top: '-14px',
+        left: '-14px',
+        width: '42px',
+        height: '42px',
+        borderRadius: '50%',
+        background: step.iconColor,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '1.05rem',
+        fontWeight: 800,
+        color: 'white',
+        boxShadow: '0 10px 25px rgba(0,0,0,0.4)',
+      }}
+    >
+      {step.number}
+    </div>
             <div
               style={{
                 width: '3rem',
@@ -807,6 +803,7 @@ export default function TutorialPage() {
             )}
           </motion.div>
         )}
+        </motion.div>
       </div>
     );
   })}
