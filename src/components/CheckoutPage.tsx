@@ -89,12 +89,12 @@ export function CheckoutPage({
 
   // Calculate GST on discounted price
   const getTax = () => {
-    return Math.round(getPriceAfterDiscount() * 0.18);
+    return (getPriceAfterDiscount() * 0.18);
   };
 
   // Calculate final total
   const getTotal = () => {
-    return Math.round(getPriceAfterDiscount() + getTax());
+    return (getPriceAfterDiscount() + getTax());
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -106,11 +106,6 @@ export function CheckoutPage({
     }
 
     try {
-      // Map UI billing cycles to backend billing cycles
-      const backendBillingCycle = 
-        billingCycle === "quarterly" || billingCycle === "half-yearly" 
-          ? "monthly" 
-          : billingCycle;
 
       const exists = await checkCustomerExists(loggedInUser.email);
       if (!exists) {
@@ -127,7 +122,7 @@ export function CheckoutPage({
           name: formData.companyName,
           email: loggedInUser.email,
           licenseId: lmsPlan.licenseId, 
-          billingCycle: "monthly",
+          billingCycle: billingCycle,
           amount: 0,
           currency: "INR",
         });
@@ -141,7 +136,7 @@ export function CheckoutPage({
         name: formData.companyName,
         email: loggedInUser.email,
         licenseId: lmsPlan.licenseId,
-        billingCycle: backendBillingCycle,
+        billingCycle: billingCycle,
         amount: getTotal(),
         currency: "INR",
       });

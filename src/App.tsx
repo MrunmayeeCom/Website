@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   Routes,
   Route,
@@ -12,7 +12,6 @@ import { HeroSection } from "./components/HeroSection";
 import { FeaturesSection } from "./components/FeaturesSection";
 import { WhyChooseUs } from "./components/WhyChooseUs";
 import { ProductSection } from "./components/ProductSection";
-import { UseCasesSection } from "./components/UseCasesSection";
 import { FAQSection } from "./components/FAQSection";
 import { PricingSection } from "./components/PricingSection";
 import { CheckoutPage } from "./components/CheckoutPage";
@@ -28,11 +27,11 @@ import { PartnerPage } from "./components/pages/PartnerPage";
 import { BecomePartnerPage } from "./components/pages/BecomePartnerPage";
 
 import { Toaster } from "./components/ui/sonner";
-import TutorialPage from './components/TutorialPage';
+import TutorialPage from "./components/TutorialPage";
 
 type BillingCycle = "monthly" | "quarterly" | "half-yearly" | "yearly";
 
-/* ---------------- SCROLL HANDLER ---------------- */
+/* ---------------- SCROLL REDIRECT ---------------- */
 
 function SectionRedirect({ sectionId }: { sectionId: string }) {
   const navigate = useNavigate();
@@ -41,28 +40,25 @@ function SectionRedirect({ sectionId }: { sectionId: string }) {
     navigate("/", { replace: true });
 
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const el = document.getElementById(sectionId);
-        if (!el) return;
+      const el = document.getElementById(sectionId);
+      if (!el) return;
 
-        const yOffset = -80;
-        const y =
-          el.getBoundingClientRect().top +
-          window.pageYOffset +
-          yOffset;
+      const yOffset = -80;
+      const y =
+        el.getBoundingClientRect().top +
+        window.pageYOffset +
+        yOffset;
 
-        window.scrollTo({ top: y, behavior: "smooth" });
-      });
+      window.scrollTo({ top: y, behavior: "smooth" });
     });
   }, [navigate, sectionId]);
 
   return null;
 }
 
-
 export default function App() {
   const navigate = useNavigate();
-  const location = useLocation(); // ✅ REQUIRED
+  const location = useLocation();
 
   const hideHeader =
     location.pathname === "/tutorials" ||
@@ -78,8 +74,36 @@ export default function App() {
     window.history.scrollRestoration = "manual";
   }, []);
 
+  /* ---------------- SCROLL TO PRICING ---------------- */
+  const scrollToPricing = () => {
+    // If not on home page, navigate to home first
+    if (location.pathname !== "/") {
+      navigate("/");
+      // Wait for navigation to complete, then scroll
+      setTimeout(() => {
+        const el = document.getElementById("pricing");
+        if (el) {
+          const yOffset = -80;
+          const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: "smooth" });
+        }
+      }, 100);
+    } else {
+      // Already on home page, just scroll
+      const el = document.getElementById("pricing");
+      if (el) {
+        const yOffset = -80;
+        const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: "smooth" });
+      }
+    }
+  };
+
+  /* ---------------- LOGIN FLOW ---------------- */
+
   const handleAdminLogin = () => {
     if (!pendingCheckout) return;
+
     const planSlug = selectedPlan.toLowerCase().replace(/\s+/g, "-");
     navigate(`/checkout/${planSlug}`);
     setPendingCheckout(false);
@@ -105,10 +129,12 @@ export default function App() {
   };
 
   const handleFooterNavigate = (
-    page: 'privacy' | 'terms' | 'cookies' | 'security'
+    page: "privacy" | "terms" | "cookies" | "security"
   ) => {
     navigate(`/${page}`);
   };
+
+  /* ---------------- HOME PAGE ---------------- */
 
   const HomePage = () => (
     <>
@@ -136,29 +162,36 @@ export default function App() {
         <section id="faqs">
           <FAQSection />
         </section>
-
       </main>
 
       <Footer onNavigate={handleFooterNavigate} />
     </>
   );
 
-      return (
-        <div className="min-h-screen bg-background">
-          {!hideHeader && (
-  <Header
-  onLoginClick={() => setLoginModalOpen(true)}
-  onNavigateToPartners={() => navigate("/partners")}
-/>
-)}
+  /* ---------------- CURRENT PAGE DETECTOR ---------------- */
 
+  const currentPage =
+    location.pathname.startsWith("/partners")
+      ? "partners"
+      : location.pathname.startsWith("/become-partner")
+      ? "become-partner"
+      : "home";
+
+  return (
+    <div className="min-h-screen bg-background">
+      {!hideHeader && (
+        <Header
+          onLoginClick={() => setLoginModalOpen(true)}
+          onNavigateHome={() => navigate("/")}
+          onNavigateToPartners={() => navigate("/partners")}
+          currentPage={currentPage}
+        />
+      )}
 
       <Routes>
-
-        {/* Main page */}
         <Route path="/" element={<HomePage />} />
 
-        {/* 🔥 SEO-friendly virtual routes */}
+        {/* SEO virtual routes */}
         <Route path="/pricing" element={<SectionRedirect sectionId="pricing" />} />
         <Route path="/faqs" element={<SectionRedirect sectionId="faqs" />} />
         <Route path="/features" element={<SectionRedirect sectionId="features" />} />
@@ -167,7 +200,6 @@ export default function App() {
 
         <Route path="/tutorials" element={<TutorialPage />} />
 
-        {/* Real pages */}
         <Route
           path="/checkout/:planName?"
           element={
@@ -180,17 +212,14 @@ export default function App() {
           }
         />
 
-        <Route
-          path="/payment-success"
-          element={<PaymentSuccess />}
-        />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
 
         <Route path="/privacy" element={<PrivacyPolicy onBack={() => navigate("/")} />} />
         <Route path="/terms" element={<TermsOfService onBack={() => navigate("/")} />} />
         <Route path="/cookies" element={<CookiePolicy onBack={() => navigate("/")} />} />
         <Route path="/security" element={<Security onBack={() => navigate("/")} />} />
 
-         <Route
+        <Route
           path="/partners"
           element={
             <>
@@ -208,17 +237,17 @@ export default function App() {
               <Footer onNavigate={handleFooterNavigate} />
             </>
           }
-        /> 
+        />
 
-        {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-
 
       <LoginModal
         open={loginModalOpen}
         onOpenChange={setLoginModalOpen}
-        onAdminLogin={handleAdminLogin}
+        onAdminLogin={() => handleAdminLogin()}
+        onLoginSuccess={() => setLoginModalOpen(false)}
+        onNavigateToPricing={scrollToPricing}
       />
 
       <Toaster />
