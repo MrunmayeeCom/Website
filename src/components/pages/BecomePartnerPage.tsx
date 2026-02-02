@@ -18,6 +18,7 @@ import {
   MapPin
 } from "lucide-react";
 import { toast } from "sonner";
+import { submitPartnerApplication } from "../../api/partnerProgram";
 
 interface BecomePartnerPageProps {
   onNavigateHome: () => void;
@@ -90,33 +91,108 @@ export function BecomePartnerPage({ onNavigateHome, onNavigateToPartnerDirectory
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Mapping functions to match API requirements
+  const mapExperience = (exp: string) => {
+    switch (exp) {
+      case "0-2":
+        return "0-1";
+      case "3-5":
+        return "3-5";
+      case "6-10":
+        return "5-10";
+      case "10+":
+        return "10+";
+      default:
+        return "0-1";
+    }
+  };
+
+  const mapEmployeeCount = (employees: string) => {
+    // Map to the format expected by the API
+    return employees;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     // Validate required fields
     if (!formData.companyName || !formData.contactPerson || !formData.email || !formData.phone) {
       toast.error("Please fill in all required fields");
       return;
     }
-    
-    toast.success("Application submitted successfully! We'll contact you within 48 hours.");
-    // Reset form
-    setFormData({
-      companyName: "",
-      contactPerson: "",
-      email: "",
-      phone: "",
-      country: "",
-      city: "",
-      website: "",
-      businessType: "",
-      employees: "",
-      experience: "",
-      specialization: [],
-      annualRevenue: "",
-      existingClients: "",
-      certifications: "",
-      message: ""
-    });
+
+    // Additional validation for country and city
+    if (!formData.country || !formData.city) {
+      toast.error("Please fill in country and city");
+      return;
+    }
+
+    try {
+      // Prepare payload to match API schema
+      const payload = {
+        contactInformation: {
+          fullName: formData.contactPerson,
+          email: formData.email,
+          phone: formData.phone,
+        },
+
+        companyInformation: {
+          companyName: formData.companyName,
+          website: formData.website || "",
+          country: formData.country,
+          city: formData.city,
+        },
+
+        businessDetails: {
+          businessType: formData.businessType || "Other",
+          yearsInBusiness: mapExperience(formData.experience),
+          numberOfEmployees: mapEmployeeCount(formData.employees),
+          existingClients: parseInt(formData.existingClients) || 0,
+        },
+
+        partnershipDetails: {
+          joinAs: "channel_partner", // Default to channel_partner for GeoTrack
+          motivation: formData.message || "No additional information provided",
+        },
+
+        source: "geotrack",
+      };
+
+      console.log("Submitting partner application:", payload);
+
+      await submitPartnerApplication(payload);
+
+      toast.success("Application submitted successfully! We'll contact you within 48 hours.");
+      
+      // Reset form
+      setFormData({
+        companyName: "",
+        contactPerson: "",
+        email: "",
+        phone: "",
+        country: "",
+        city: "",
+        website: "",
+        businessType: "",
+        employees: "",
+        experience: "",
+        specialization: [],
+        annualRevenue: "",
+        existingClients: "",
+        certifications: "",
+        message: ""
+      });
+
+    } catch (error: any) {
+      console.error("Partner application failed:", error);
+      console.error("Error response:", error.response?.data);
+      
+      const errorMessage = error.response?.data?.message 
+        || error.message 
+        || "Something went wrong. Please try again.";
+      
+      toast.error(`Submission failed: ${errorMessage}`);
+    }
   };
 
   const specializations = [
@@ -440,23 +516,29 @@ export function BecomePartnerPage({ onNavigateHome, onNavigateToPartnerDirectory
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2">Country</label>
+                      <label className="block text-sm font-medium mb-2">
+                        Country <span className="text-red-500">*</span>
+                      </label>
                       <input
                         type="text"
                         name="country"
                         value={formData.country}
                         onChange={handleInputChange}
+                        required
                         className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                         placeholder="India"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2">City</label>
+                      <label className="block text-sm font-medium mb-2">
+                        City <span className="text-red-500">*</span>
+                      </label>
                       <input
                         type="text"
                         name="city"
                         value={formData.city}
                         onChange={handleInputChange}
+                        required
                         className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                         placeholder="Mumbai"
                       />
@@ -491,11 +573,11 @@ export function BecomePartnerPage({ onNavigateHome, onNavigateToPartnerDirectory
                         className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                       >
                         <option value="">Select type</option>
-                        <option value="reseller">Reseller</option>
-                        <option value="consultant">Consultant</option>
-                        <option value="integrator">System Integrator</option>
-                        <option value="developer">Software Developer</option>
-                        <option value="other">Other</option>
+                        <option value="Reseller">Reseller</option>
+                        <option value="Consulting">Consultant</option>
+                        <option value="Technology">System Integrator</option>
+                        <option value="Other">Software Developer</option>
+                        <option value="Other">Other</option>
                       </select>
                     </div>
                     <div>
