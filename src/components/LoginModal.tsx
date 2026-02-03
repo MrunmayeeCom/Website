@@ -114,6 +114,7 @@ export function LoginModal({ open, onOpenChange, onAdminLogin, onLoginSuccess, o
         await syncCustomer({
           name,
           email: adminEmail,
+          password: adminPassword,
           source: "GeoTrack",
         });
 

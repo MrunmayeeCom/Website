@@ -107,14 +107,14 @@ export function CheckoutPage({
 
     try {
 
-      const exists = await checkCustomerExists(loggedInUser.email);
-      if (!exists) {
-        await syncCustomer({
-          name: formData.companyName,
-          email: loggedInUser.email,
-          source: "GeoTrack",
-        });
-      }
+      // const exists = await checkCustomerExists(loggedInUser.email);
+      // if (!exists) {
+      //   await syncCustomer({
+      //     name: formData.companyName,
+      //     email: loggedInUser.email,
+      //     source: "GeoTrack",
+      //   });
+      // }
 
       // Handle free plan
       if (lmsPlan.pricePerUser === 0) {
@@ -128,7 +128,7 @@ export function CheckoutPage({
         });
 
         alert("Free plan activated successfully 🎉");
-        window.location.href = "/payment-success?free=true";
+        navigate("/payment-success?free=true");
         return;
       }
 
@@ -413,7 +413,7 @@ export function CheckoutPage({
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-background py-12">
       <div className="container mx-auto px-4 max-w-7xl">
-        <Button variant="ghost" onClick={onBack} className="mb-6">
+        <Button variant="ghost" onClick={() => navigate('/pricing')} className="mb-6">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Plans
         </Button>

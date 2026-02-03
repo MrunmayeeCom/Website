@@ -10,7 +10,7 @@ export function Footer({ onNavigate }: FooterProps) {
     <footer className="bg-primary text-gray-300 border-t border-primary/20">
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col items-center gap-4">
-          <p className="text-sm text-center animate-fade-in">&copy; 2025 Trackon. All rights reserved.</p>
+          <p className="text-sm text-center animate-fade-in">&copy; 2025 GeoTrack. All rights reserved.</p>
           <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-sm">
             <button 
               onClick={() => onNavigate('privacy')} 

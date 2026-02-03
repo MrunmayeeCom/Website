@@ -23,26 +23,25 @@ import { submitPartnerApplication } from "../../api/partnerProgram";
 interface BecomePartnerPageProps {
   onNavigateHome: () => void;
   onNavigateToPartnerDirectory: () => void;
+  onContactClick: () => void;
 }
 
-export function BecomePartnerPage({ onNavigateHome, onNavigateToPartnerDirectory }: BecomePartnerPageProps) {
+export function BecomePartnerPage({ onNavigateHome, onNavigateToPartnerDirectory, onContactClick }: BecomePartnerPageProps) {
   const [formData, setFormData] = useState({
     companyName: "",
-    contactPerson: "",
+    contactName: "",
     email: "",
     phone: "",
     country: "",
     city: "",
     website: "",
-    businessType: "",
-    employees: "",
+    companySize: "",
+    partnerType: "",
     experience: "",
-    specialization: [] as string[],
-    annualRevenue: "",
-    existingClients: "",
-    certifications: "",
     message: ""
   });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const heroRef = useRef<HTMLDivElement>(null);
   const benefitsRef = useRef<HTMLDivElement>(null);
@@ -74,7 +73,7 @@ export function BecomePartnerPage({ onNavigateHome, onNavigateToPartnerDirectory
     return () => observer.disconnect();
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -82,23 +81,24 @@ export function BecomePartnerPage({ onNavigateHome, onNavigateToPartnerDirectory
     }));
   };
 
-  const handleSpecializationChange = (specialty: string) => {
-    setFormData(prev => ({
-      ...prev,
-      specialization: prev.specialization.includes(specialty)
-        ? prev.specialization.filter(s => s !== specialty)
-        : [...prev.specialization, specialty]
-    }));
+  // Mapping functions to match API requirements
+  const mapPartnerType = (type: string) => {
+    if (type === "distributor") {
+      return "distributor";
+    }
+    // All other types (reseller, implementation, technology, referral) are channel partners
+    return "channel_partner";
   };
 
-  // Mapping functions to match API requirements
   const mapExperience = (exp: string) => {
     switch (exp) {
-      case "0-2":
+      case "0-1":
         return "0-1";
+      case "1-3":
+        return "1-3";
       case "3-5":
         return "3-5";
-      case "6-10":
+      case "5-10":
         return "5-10";
       case "10+":
         return "10+";
@@ -107,31 +107,38 @@ export function BecomePartnerPage({ onNavigateHome, onNavigateToPartnerDirectory
     }
   };
 
-  const mapEmployeeCount = (employees: string) => {
-    // Map to the format expected by the API
-    return employees;
+  const mapBusinessType = (partnerType: string) => {
+    switch (partnerType) {
+      case "technology":
+        return "Technology";
+      case "reseller":
+        return "Reseller";
+      case "implementation":
+        return "Consulting";
+      case "referral":
+        return "Other";
+      default:
+        return "Other";
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate required fields
-    if (!formData.companyName || !formData.contactPerson || !formData.email || !formData.phone) {
+    if (!formData.companyName || !formData.contactName || !formData.email || 
+        !formData.phone || !formData.country || !formData.city || 
+        !formData.companySize || !formData.partnerType || !formData.experience) {
       toast.error("Please fill in all required fields");
       return;
     }
 
-    // Additional validation for country and city
-    if (!formData.country || !formData.city) {
-      toast.error("Please fill in country and city");
-      return;
-    }
+    setIsSubmitting(true);
 
     try {
-      // Prepare payload to match API schema
       const payload = {
         contactInformation: {
-          fullName: formData.contactPerson,
+          fullName: formData.contactName,
           email: formData.email,
           phone: formData.phone,
         },
@@ -144,14 +151,14 @@ export function BecomePartnerPage({ onNavigateHome, onNavigateToPartnerDirectory
         },
 
         businessDetails: {
-          businessType: formData.businessType || "Other",
+          businessType: mapBusinessType(formData.partnerType),
           yearsInBusiness: mapExperience(formData.experience),
-          numberOfEmployees: mapEmployeeCount(formData.employees),
-          existingClients: parseInt(formData.existingClients) || 0,
+          numberOfEmployees: formData.companySize,
+          existingClients: 0,
         },
 
         partnershipDetails: {
-          joinAs: "channel_partner", // Default to channel_partner for GeoTrack
+          joinAs: mapPartnerType(formData.partnerType),
           motivation: formData.message || "No additional information provided",
         },
 
@@ -162,24 +169,20 @@ export function BecomePartnerPage({ onNavigateHome, onNavigateToPartnerDirectory
 
       await submitPartnerApplication(payload);
 
-      toast.success("Application submitted successfully! We'll contact you within 48 hours.");
+      toast.success("Thank you for your interest! We'll review your application and get back to you within 48 hours.");
       
       // Reset form
       setFormData({
         companyName: "",
-        contactPerson: "",
+        contactName: "",
         email: "",
         phone: "",
         country: "",
         city: "",
         website: "",
-        businessType: "",
-        employees: "",
+        companySize: "",
+        partnerType: "",
         experience: "",
-        specialization: [],
-        annualRevenue: "",
-        existingClients: "",
-        certifications: "",
         message: ""
       });
 
@@ -192,19 +195,10 @@ export function BecomePartnerPage({ onNavigateHome, onNavigateToPartnerDirectory
         || "Something went wrong. Please try again.";
       
       toast.error(`Submission failed: ${errorMessage}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
-
-  const specializations = [
-    "Implementation & Deployment",
-    "Custom Development",
-    "API Integration",
-    "Training & Support",
-    "ERP Integration",
-    "Mobile Solutions",
-    "Data Migration",
-    "Consulting Services"
-  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -442,264 +436,191 @@ export function BecomePartnerPage({ onNavigateHome, onNavigateToPartnerDirectory
 
             <Card className="p-8">
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Company Information */}
-                <div>
-                  <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                    <Building2 className="w-5 h-5 text-primary" />
-                    Company Information
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Company Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="companyName"
-                        value={formData.companyName}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="Your company name"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Contact Person <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="contactPerson"
-                        value={formData.contactPerson}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="Full name"
-                      />
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">
+                      Company Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="companyName"
+                      value={formData.companyName}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors"
+                      placeholder="Your company name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">
+                      Contact Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="contactName"
+                      value={formData.contactName}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors"
+                      placeholder="Your full name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">
+                      Email Address <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors"
+                      placeholder="your@email.com"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">
+                      Phone Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors"
+                      placeholder="+91 XXXXX XXXXX"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">
+                      Country <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="country"
+                      value={formData.country}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors"
+                      placeholder="Your country"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">
+                      City <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="city"
+                      value={formData.city}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors"
+                      placeholder="Your city"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">Company Website</label>
+                    <input
+                      type="url"
+                      name="website"
+                      value={formData.website}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors"
+                      placeholder="https://yourcompany.com"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">
+                      Company Size <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      name="companySize"
+                      value={formData.companySize}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors"
+                    >
+                      <option value="">Select size</option>
+                      <option value="1-10">1-10 employees</option>
+                      <option value="11-50">11-50 employees</option>
+                      <option value="51-200">51-200 employees</option>
+                      <option value="201-500">201-500 employees</option>
+                      <option value="500+">500+ employees</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">
+                      Partner Type <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      name="partnerType"
+                      value={formData.partnerType}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors"
+                    >
+                      <option value="">Select type</option>
+                      <option value="reseller">Reseller Partner</option>
+                      <option value="distributor">Distributor</option>
+                      <option value="implementation">Implementation Partner</option>
+                      <option value="technology">Technology Partner</option>
+                      <option value="referral">Referral Partner</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">
+                      Years of Experience <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      name="experience"
+                      value={formData.experience}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors"
+                    >
+                      <option value="">Select experience</option>
+                      <option value="0-1">0-1 years</option>
+                      <option value="1-3">1-3 years</option>
+                      <option value="3-5">3-5 years</option>
+                      <option value="5-10">5-10 years</option>
+                      <option value="10+">10+ years</option>
+                    </select>
                   </div>
                 </div>
 
-                {/* Contact Information */}
                 <div>
-                  <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                    <Mail className="w-5 h-5 text-primary" />
-                    Contact Information
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Email <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="email@company.com"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Phone <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="+91 XXXXX XXXXX"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Country <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="country"
-                        value={formData.country}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="India"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        City <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="city"
-                        value={formData.city}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="Mumbai"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium mb-2">Website</label>
-                      <input
-                        type="url"
-                        name="website"
-                        value={formData.website}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="https://www.yourcompany.com"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Business Details */}
-                <div>
-                  <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                    <Users className="w-5 h-5 text-primary" />
-                    Business Details
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Business Type</label>
-                      <select
-                        name="businessType"
-                        value={formData.businessType}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      >
-                        <option value="">Select type</option>
-                        <option value="Reseller">Reseller</option>
-                        <option value="Consulting">Consultant</option>
-                        <option value="Technology">System Integrator</option>
-                        <option value="Other">Software Developer</option>
-                        <option value="Other">Other</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Number of Employees</label>
-                      <select
-                        name="employees"
-                        value={formData.employees}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      >
-                        <option value="">Select range</option>
-                        <option value="1-10">1-10</option>
-                        <option value="11-50">11-50</option>
-                        <option value="51-200">51-200</option>
-                        <option value="201-500">201-500</option>
-                        <option value="500+">500+</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Years of Experience</label>
-                      <select
-                        name="experience"
-                        value={formData.experience}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      >
-                        <option value="">Select range</option>
-                        <option value="0-2">0-2 years</option>
-                        <option value="3-5">3-5 years</option>
-                        <option value="6-10">6-10 years</option>
-                        <option value="10+">10+ years</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Annual Revenue</label>
-                      <select
-                        name="annualRevenue"
-                        value={formData.annualRevenue}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      >
-                        <option value="">Select range</option>
-                        <option value="0-50L">₹0 - ₹50 Lakhs</option>
-                        <option value="50L-1Cr">₹50 Lakhs - ₹1 Crore</option>
-                        <option value="1-5Cr">₹1 - ₹5 Crores</option>
-                        <option value="5Cr+">₹5 Crores+</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Specialization */}
-                <div>
-                  <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                    <Target className="w-5 h-5 text-primary" />
-                    Areas of Specialization
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {specializations.map((specialty) => (
-                      <label key={specialty} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={formData.specialization.includes(specialty)}
-                          onChange={() => handleSpecializationChange(specialty)}
-                          className="w-4 h-4 text-primary rounded focus:ring-primary"
-                        />
-                        <span className="text-sm">{specialty}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Additional Information */}
-                <div>
-                  <h3 className="text-xl font-semibold mb-4">Additional Information</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Existing Client Base (Optional)
-                      </label>
-                      <input
-                        type="text"
-                        name="existingClients"
-                        value={formData.existingClients}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="Approximate number of clients"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Relevant Certifications (Optional)
-                      </label>
-                      <input
-                        type="text"
-                        name="certifications"
-                        value={formData.certifications}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="List any relevant certifications"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Message / Why do you want to become a partner?
-                      </label>
-                      <textarea
-                        name="message"
-                        value={formData.message}
-                        onChange={handleInputChange}
-                        rows={4}
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                        placeholder="Tell us about your interest in becoming a partner..."
-                      />
-                    </div>
-                  </div>
+                  <label className="block text-sm font-semibold mb-2">Additional Information</label>
+                  <textarea
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    rows={4}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors resize-none"
+                    placeholder="Tell us why you want to become a partner and what makes your company unique..."
+                  />
                 </div>
 
                 {/* Submit Button */}
                 <div className="pt-4">
-                  <Button type="submit" size="lg" className="w-full">
-                    Submit Application
+                  <Button 
+                    type="submit" 
+                    size="lg" 
+                    className="w-full"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Submitting..." : "Submit Application"}
                   </Button>
                   <p className="text-sm text-muted-foreground text-center mt-4">
                     By submitting this form, you agree to our terms and conditions
@@ -732,6 +653,7 @@ export function BecomePartnerPage({ onNavigateHome, onNavigateToPartnerDirectory
             <Button 
               size="lg" 
               variant="outline"
+              onClick={onContactClick}
               className="bg-transparent border-white text-white hover:bg-white/10"
             >
               Contact Partner Team

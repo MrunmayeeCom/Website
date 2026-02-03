@@ -1,6 +1,7 @@
 import { Button } from "./ui/button";
 import { ArrowRight, Play, PhoneCall } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { useNavigate } from "react-router-dom";
 
 interface HeroSectionProps {
   onGetStartedClick: () => void;
@@ -8,6 +9,8 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ onGetStartedClick, onContactSalesClick }: HeroSectionProps) {
+  const navigate = useNavigate();
+
   return (
     <section id="home" className="relative overflow-hidden bg-gradient-to-b from-white via-secondary/20 to-white py-20 md:py-32">
       {/* Decorative background elements */}
@@ -28,7 +31,8 @@ export function HeroSection({ onGetStartedClick, onContactSalesClick }: HeroSect
               <span className="text-accent">Smarter</span>{" "}
               <span className="text-primary">Field Sales Solutions</span>
               <br />
-              <span className="text-primary">for Growing Businesses</span>
+              <span className="text-primary">for </span>
+              <span className="text-accent">Growing Businesses</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl animate-fade-in-up" style={{ animationDelay: '200ms' }}>
               Streamline operations, boost productivity, and scale faster with 
@@ -36,7 +40,7 @@ export function HeroSection({ onGetStartedClick, onContactSalesClick }: HeroSect
               across industries.
             </p>
             <div className="flex flex-wrap gap-4 animate-fade-in-up" style={{ animationDelay: '400ms' }}>
-              <Button size="lg" onClick={onGetStartedClick} className="gap-2 bg-accent hover:bg-accent/90 hover:scale-105 transition-transform duration-300">
+              <Button size="lg" onClick={() => navigate('/contact')} className="gap-2 bg-accent hover:bg-accent/90 hover:scale-105 transition-transform duration-300">
                 Get a Demo
                 <ArrowRight className="h-4 w-4" />
               </Button>

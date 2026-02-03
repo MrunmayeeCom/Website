@@ -31,7 +31,7 @@ export function CookiePolicy({ onBack }: CookiePolicyProps) {
             <section>
               <h2 className="text-2xl mb-3">2. How We Use Cookies</h2>
               <p className="text-muted-foreground mb-3">
-                Trackon uses cookies for the following purposes:
+                GeoTrack uses cookies for the following purposes:
               </p>
               <ul className="list-disc list-inside space-y-2 text-muted-foreground">
                 <li><strong>Authentication:</strong> To keep you logged in and maintain your session</li>
@@ -65,7 +65,7 @@ export function CookiePolicy({ onBack }: CookiePolicyProps) {
                 <div>
                   <h3 className="text-lg mb-2">Analytics Cookies</h3>
                   <p className="text-muted-foreground">
-                    Help us understand how users interact with Trackon by collecting information about pages visited, 
+                    Help us understand how users interact with GeoTrack by collecting information about pages visited, 
                     features used, and time spent on the platform. This data is aggregated and anonymous.
                   </p>
                 </div>
@@ -106,7 +106,7 @@ export function CookiePolicy({ onBack }: CookiePolicyProps) {
                 <li>Do Not Track: We respect Do Not Track browser settings where applicable</li>
               </ul>
               <p className="text-muted-foreground mt-3">
-                Note that disabling certain cookies may affect the functionality of Trackon and limit your ability 
+                Note that disabling certain cookies may affect the functionality of GeoTrack and limit your ability 
                 to use some features.
               </p>
             </section>
@@ -114,7 +114,7 @@ export function CookiePolicy({ onBack }: CookiePolicyProps) {
             <section>
               <h2 className="text-2xl mb-3">6. Cookie Duration</h2>
               <p className="text-muted-foreground">
-                Cookies set by Trackon have varying lifespans:
+                Cookies set by GeoTrack have varying lifespans:
               </p>
               <ul className="list-disc list-inside space-y-2 mt-3 text-muted-foreground">
                 <li><strong>Session cookies:</strong> Deleted when you close your browser</li>
@@ -133,7 +133,7 @@ export function CookiePolicy({ onBack }: CookiePolicyProps) {
             <section>
               <h2 className="text-2xl mb-3">8. Contact Us</h2>
               <p className="text-muted-foreground">
-                If you have questions about our use of cookies, please contact us at cookies@trackon.com
+                If you have questions about our use of cookies, please contact us at cookies@geotrack.com
               </p>
             </section>
           </div>

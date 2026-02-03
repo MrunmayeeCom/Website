@@ -15,11 +15,8 @@ import {
 import { useNavigate } from "react-router-dom";
 
 interface PartnerPageProps {
-  onNavigateHome: () => void;
-  onNavigateToBecomePartner: () => void;
+  onBecomePartnerClick: () => void;
 }
-
-
 
 interface Partner {
   id: number;
@@ -65,7 +62,7 @@ const mockPartners: Partner[] = [
   }
 ];
 
-export function PartnerPage({ onNavigateHome, onNavigateToBecomePartner }: PartnerPageProps) {
+export function PartnerPage({ onBecomePartnerClick }: PartnerPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTab, setSelectedTab] = useState<'directory' | 'become-partner'>('directory');
   const heroRef = useRef<HTMLDivElement>(null);
@@ -125,7 +122,7 @@ export function PartnerPage({ onNavigateHome, onNavigateToBecomePartner }: Partn
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap gap-4 -mb-px">
             <button
-              onClick={() => navigate("/become-partner")}
+              onClick={onBecomePartnerClick}
               className="px-6 py-4 text-sm font-medium border-b-2 border-transparent hover:border-primary hover:text-primary transition-colors"
             >
               Become a partner
@@ -297,7 +294,7 @@ export function PartnerPage({ onNavigateHome, onNavigateToBecomePartner }: Partn
           <Button 
             size="lg" 
             variant="secondary"
-            onClick={onNavigateToBecomePartner}
+            onClick={onBecomePartnerClick}
             className="bg-white text-primary hover:bg-white/90"
           >
             Become a Partner

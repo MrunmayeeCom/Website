@@ -18,7 +18,7 @@ export function Security({ onBack }: SecurityProps) {
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl mb-4">Security</h1>
           <p className="text-muted-foreground mb-8">
-            At Trackon, we take security seriously. Learn about our security measures and best practices.
+            At GeoTrack, we take security seriously. Learn about our security measures and best practices.
           </p>
 
           <div className="space-y-6">
@@ -117,7 +117,7 @@ export function Security({ onBack }: SecurityProps) {
             <section>
               <h2 className="text-2xl mb-3">Compliance & Certifications</h2>
               <p className="text-muted-foreground mb-3">
-                Trackon complies with industry standards and regulations:
+                GeoTrack complies with industry standards and regulations:
               </p>
               <ul className="list-disc list-inside space-y-2 text-muted-foreground">
                 <li>GDPR compliance for European users</li>
@@ -133,7 +133,7 @@ export function Security({ onBack }: SecurityProps) {
                 We recommend following these security practices:
               </p>
               <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                <li>Use strong, unique passwords for your Trackon account</li>
+                <li>Use strong, unique passwords for your GeoTrack account</li>
                 <li>Enable two-factor authentication when available</li>
                 <li>Regularly review user access permissions</li>
                 <li>Log out from shared or public devices</li>
@@ -163,7 +163,7 @@ export function Security({ onBack }: SecurityProps) {
                   <h3 className="text-lg mb-2">Report Security Issues</h3>
                   <p className="text-muted-foreground">
                     If you discover a security vulnerability or have concerns about our security practices, 
-                    please report it immediately to our security team at <strong>security@trackon.com</strong>. 
+                    please report it immediately to our security team at <strong>security@geotrack.com</strong>. 
                     We take all reports seriously and will respond promptly.
                   </p>
                 </div>

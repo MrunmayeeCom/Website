@@ -5,6 +5,7 @@ import { Textarea } from "../ui/textarea";
 import { Mail, Phone, MapPin, Clock, MessageCircle, HeadphonesIcon } from "lucide-react";
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface ContactPageProps {
   onBack: () => void;
@@ -21,6 +22,8 @@ export function ContactPage({ onBack, initialType = 'support' }: ContactPageProp
     message: '',
     type: initialType
   });
+
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -298,7 +301,7 @@ export function ContactPage({ onBack, initialType = 'support' }: ContactPageProp
               <p className="text-sm text-muted-foreground mb-4">
                 Check out our FAQ section for instant answers to common questions.
               </p>
-              <Button variant="outline" onClick={onBack} className="border-accent text-accent hover:bg-accent hover:text-white">
+              <Button variant="outline" onClick={() => navigate('/faqs')} className="border-accent text-accent hover:bg-accent hover:text-white">
                 Visit FAQ Section
               </Button>
             </div>

@@ -25,44 +25,22 @@ import { CookiePolicy } from "./components/pages/CookiePolicy";
 import { Security } from "./components/pages/Security";
 import { PartnerPage } from "./components/pages/PartnerPage";
 import { BecomePartnerPage } from "./components/pages/BecomePartnerPage";
+import { ContactPage } from "./components/pages/ContactPage";
 
 import { Toaster } from "./components/ui/sonner";
 import TutorialPage from "./components/TutorialPage";
 
 type BillingCycle = "monthly" | "quarterly" | "half-yearly" | "yearly";
 
-/* ---------------- SCROLL REDIRECT ---------------- */
-
-function SectionRedirect({ sectionId }: { sectionId: string }) {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    navigate("/", { replace: true });
-
-    requestAnimationFrame(() => {
-      const el = document.getElementById(sectionId);
-      if (!el) return;
-
-      const yOffset = -80;
-      const y =
-        el.getBoundingClientRect().top +
-        window.pageYOffset +
-        yOffset;
-
-      window.scrollTo({ top: y, behavior: "smooth" });
-    });
-  }, [navigate, sectionId]);
-
-  return null;
-}
-
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Hide header only on tutorials, checkout, and payment-success pages
   const hideHeader =
     location.pathname === "/tutorials" ||
-    location.pathname.startsWith("/checkout");
+    location.pathname.startsWith("/checkout") ||
+    location.pathname === "/payment-success";
 
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("");
@@ -74,30 +52,34 @@ export default function App() {
     window.history.scrollRestoration = "manual";
   }, []);
 
-  /* ---------------- SCROLL TO PRICING ---------------- */
-  const scrollToPricing = () => {
-    // If not on home page, navigate to home first
+  /* ---------------- SCROLL TO SECTION ---------------- */
+  const scrollToSection = (sectionId: string) => {
+    const doScroll = () => {
+      const el = document.getElementById(sectionId);
+      if (!el) return;
+
+      const yOffset = -80;
+      const y =
+        el.getBoundingClientRect().top +
+        window.pageYOffset +
+        yOffset;
+
+      window.scrollTo({ top: y, behavior: "smooth" });
+    };
+
+    // If not on home page, navigate first
     if (location.pathname !== "/") {
       navigate("/");
-      // Wait for navigation to complete, then scroll
       setTimeout(() => {
-        const el = document.getElementById("pricing");
-        if (el) {
-          const yOffset = -80;
-          const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
-          window.scrollTo({ top: y, behavior: "smooth" });
-        }
+        doScroll();
       }, 100);
     } else {
-      // Already on home page, just scroll
-      const el = document.getElementById("pricing");
-      if (el) {
-        const yOffset = -80;
-        const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
-        window.scrollTo({ top: y, behavior: "smooth" });
-      }
+      // Already on home, just scroll
+      doScroll();
     }
   };
+
+  const scrollToPricing = () => scrollToSection("pricing");
 
   /* ---------------- LOGIN FLOW ---------------- */
 
@@ -112,15 +94,34 @@ export default function App() {
   const handlePlanSelect = (plan: string, cycle: BillingCycle) => {
     setSelectedPlan(plan);
     setBillingCycle(cycle);
-    setPendingCheckout(true);
-    setLoginModalOpen(true);
+    
+    // Check if user is already logged in
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      // User is logged in, go directly to checkout
+      const planSlug = plan.toLowerCase().replace(/\s+/g, "-");
+      navigate(`/checkout/${planSlug}`);
+    } else {
+      // User not logged in, show login modal
+      setPendingCheckout(true);
+      setLoginModalOpen(true);
+    }
   };
 
   const handleGetStartedClick = () => {
     setSelectedPlan("Starter");
     setBillingCycle("monthly");
-    setPendingCheckout(true);
-    setLoginModalOpen(true);
+    
+    // Check if user is already logged in
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      // User is logged in, go directly to checkout
+      navigate(`/checkout/starter`);
+    } else {
+      // User not logged in, show login modal
+      setPendingCheckout(true);
+      setLoginModalOpen(true);
+    }
   };
 
   const handleProceedToPayment = (cycle: BillingCycle) => {
@@ -160,7 +161,7 @@ export default function App() {
         </section>
 
         <section id="faqs">
-          <FAQSection />
+          <FAQSection onContactClick={() => navigate("/contact")} />
         </section>
       </main>
 
@@ -191,12 +192,12 @@ export default function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
 
-        {/* SEO virtual routes */}
-        <Route path="/pricing" element={<SectionRedirect sectionId="pricing" />} />
-        <Route path="/faqs" element={<SectionRedirect sectionId="faqs" />} />
-        <Route path="/features" element={<SectionRedirect sectionId="features" />} />
-        <Route path="/product" element={<SectionRedirect sectionId="product" />} />
-        <Route path="/why-us" element={<SectionRedirect sectionId="why-us" />} />
+        {/* Section routes that maintain URL permalinks */}
+        <Route path="/pricing" element={<HomePage />} />
+        <Route path="/faqs" element={<HomePage />} />
+        <Route path="/features" element={<HomePage />} />
+        <Route path="/product" element={<HomePage />} />
+        <Route path="/why-us" element={<HomePage />} />
 
         <Route path="/tutorials" element={<TutorialPage />} />
 
@@ -220,6 +221,16 @@ export default function App() {
         <Route path="/security" element={<Security onBack={() => navigate("/")} />} />
 
         <Route
+          path="/contact"
+          element={
+            <>
+              <ContactPage onBack={() => navigate("/")} />
+              <Footer onNavigate={handleFooterNavigate} />
+            </>
+          }
+        />
+
+        <Route
           path="/partners"
           element={
             <>
@@ -233,7 +244,11 @@ export default function App() {
           path="/become-partner"
           element={
             <>
-              <BecomePartnerPage onBackToDirectory={() => navigate("/partners")} />
+              <BecomePartnerPage 
+                onNavigateHome={() => navigate("/")}
+                onNavigateToPartnerDirectory={() => navigate("/partners")}
+                onContactClick={() => navigate("/contact")}
+              />
               <Footer onNavigate={handleFooterNavigate} />
             </>
           }

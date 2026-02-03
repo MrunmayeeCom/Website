@@ -1,29 +1,9 @@
-import axios from "axios";
-
-const API = axios.create({
-  baseURL: "https://lisence-system.onrender.com",
-  // baseURL: "http://localhost:4000",
-
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-export default API;
-
-
 // import axios from "axios";
 
 // const API = axios.create({
-//   baseURL: import.meta.env.VITE_API_BASE_URL,
+//   baseURL: "https://lisence-system.onrender.com",
+//   // baseURL: "http://localhost:4000",
+
 //   headers: {
 //     "Content-Type": "application/json",
 //   },
@@ -38,3 +18,23 @@ export default API;
 // });
 
 // export default API;
+
+
+import axios from "axios";
+
+const API = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export default API;

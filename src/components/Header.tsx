@@ -1,7 +1,7 @@
 import { Button } from "./ui/button";
-import { Menu, LogIn } from "lucide-react";
+import { Menu, LogIn, Download } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import logoImage from "../assets/geotrack.png";
 
 interface HeaderProps {
@@ -23,6 +23,7 @@ export function Header({
   const [userEmail, setUserEmail] = useState("");
   const [userName, setUserName] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     checkLoginStatus();
@@ -40,6 +41,34 @@ export function Header({
       window.removeEventListener('storage', handleLoginStatusChange);
     };
   }, []);
+
+  // Scroll to section when URL changes
+  useEffect(() => {
+    const sectionMap: { [key: string]: string } = {
+      '/pricing': 'pricing',
+      '/features': 'features',
+      '/product': 'product',
+      '/why-us': 'why-us',
+      '/faqs': 'faqs',
+    };
+
+    const sectionId = sectionMap[location.pathname];
+    
+    if (sectionId) {
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        const el = document.getElementById(sectionId);
+        if (el) {
+          const yOffset = -80;
+          const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: "smooth" });
+        }
+      }, 100);
+    } else if (location.pathname === '/') {
+      // Scroll to top for home
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [location.pathname]);
 
   const checkLoginStatus = async () => {
     const userStr = localStorage.getItem("user");
@@ -105,34 +134,11 @@ export function Header({
   };
 
   /**
-   * Navigate to home and scroll to section
-   * This avoids route re-render flicker completely
+   * Navigate to section by changing URL
+   * This creates proper permalinks like /pricing, /features, etc.
    */
-  const scrollToSection = (sectionId: string) => {
-    const doScroll = () => {
-      const el = document.getElementById(sectionId);
-      if (!el) return;
-
-      const yOffset = -80;
-      const y =
-        el.getBoundingClientRect().top +
-        window.pageYOffset +
-        yOffset;
-
-      window.scrollTo({ top: y, behavior: "smooth" });
-    };
-
-    // If not on home page, navigate first
-    if (window.location.pathname !== "/") {
-      navigate("/");
-      setTimeout(() => {
-        doScroll();
-      }, 100);
-    } else {
-      // Already on home, just scroll
-      doScroll();
-    }
-
+  const navigateToSection = (sectionPath: string) => {
+    navigate(sectionPath);
     setMobileMenuOpen(false);
   };
 
@@ -150,8 +156,15 @@ export function Header({
       window.open("https://geo-track-em3s.onrender.com/dashboard", "_blank");
     } else {
       // Logged in without license - go to pricing
-      scrollToSection("pricing");
+      navigateToSection("/pricing");
     }
+    setMobileMenuOpen(false);
+  };
+
+  const handleDownloadAPK = () => {
+    // Replace with your actual APK download URL
+    const apkUrl = "https://intranet.rajlaxmiworld.com/~t5XLr";
+    window.open(apkUrl, "_blank");
     setMobileMenuOpen(false);
   };
 
@@ -190,28 +203,28 @@ export function Header({
             src={logoImage}
             alt="GeoTrack Logo"
             className="h-16 w-auto cursor-pointer"
-            onClick={() => scrollToSection("home")}
+            onClick={() => navigateToSection("/")}
           />
         </div>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">
-          <button onClick={() => scrollToSection("home")} className="text-sm hover:text-primary">
+          <button onClick={() => navigateToSection("/")} className="text-sm hover:text-primary">
             Home
           </button>
-          <button onClick={() => scrollToSection("features")} className="text-sm hover:text-primary">
+          <button onClick={() => navigateToSection("/features")} className="text-sm hover:text-primary">
             Features
           </button>
-          <button onClick={() => scrollToSection("why-us")} className="text-sm hover:text-primary">
+          <button onClick={() => navigateToSection("/why-us")} className="text-sm hover:text-primary">
             Why Us
           </button>
-          <button onClick={() => scrollToSection("product")} className="text-sm hover:text-primary">
+          <button onClick={() => navigateToSection("/product")} className="text-sm hover:text-primary">
             Product
           </button>
-          <button onClick={() => scrollToSection("pricing")} className="text-sm hover:text-primary">
+          <button onClick={() => navigateToSection("/pricing")} className="text-sm hover:text-primary">
             Pricing
           </button>
-          <button onClick={() => scrollToSection("faqs")} className="text-sm hover:text-primary">
+          <button onClick={() => navigateToSection("/faqs")} className="text-sm hover:text-primary">
             FAQs
           </button>
           <button
@@ -230,6 +243,16 @@ export function Header({
             </span>
           )}
           
+          {/* Download APK Button - Show for all users */}
+          <Button
+            onClick={handleDownloadAPK}
+            variant="outline"
+            className="hidden md:flex items-center gap-2"
+          >
+            <Download className="h-4 w-4" />
+            Download APK
+          </Button>
+
           <Button
             onClick={handleLoginButtonClick}
             className="hidden md:flex items-center gap-2"
@@ -263,22 +286,22 @@ export function Header({
       {mobileMenuOpen && (
         <div className="md:hidden border-t bg-background">
           <nav className="container mx-auto flex flex-col gap-4 p-4">
-            <button onClick={() => scrollToSection("home")} className="text-sm text-left hover:text-primary">
+            <button onClick={() => navigateToSection("/")} className="text-sm text-left hover:text-primary">
               Home
             </button>
-            <button onClick={() => scrollToSection("features")} className="text-sm text-left hover:text-primary">
+            <button onClick={() => navigateToSection("/features")} className="text-sm text-left hover:text-primary">
               Features
             </button>
-            <button onClick={() => scrollToSection("why-us")} className="text-sm text-left hover:text-primary">
+            <button onClick={() => navigateToSection("/why-us")} className="text-sm text-left hover:text-primary">
               Why Us
             </button>
-            <button onClick={() => scrollToSection("product")} className="text-sm text-left hover:text-primary">
+            <button onClick={() => navigateToSection("/product")} className="text-sm text-left hover:text-primary">
               Product
             </button>
-            <button onClick={() => scrollToSection("pricing")} className="text-sm text-left hover:text-primary">
+            <button onClick={() => navigateToSection("/pricing")} className="text-sm text-left hover:text-primary">
               Pricing
             </button>
-            <button onClick={() => scrollToSection("faqs")} className="text-sm text-left hover:text-primary">
+            <button onClick={() => navigateToSection("/faqs")} className="text-sm text-left hover:text-primary">
               FAQs
             </button>
             <button onClick={handlePartnersClick} className="text-sm text-left hover:text-primary">
@@ -290,6 +313,12 @@ export function Header({
                 Logged in as: {userName}
               </div>
             )}
+
+            {/* Download APK Button for Mobile - Show for all users */}
+            <Button onClick={handleDownloadAPK} variant="outline" className="w-full">
+              <Download className="h-4 w-4 mr-2" />
+              Download APK
+            </Button>
 
             <Button onClick={handleLoginButtonClick} className="w-full">
               <LogIn className="h-4 w-4 mr-2" />

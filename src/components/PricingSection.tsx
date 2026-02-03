@@ -9,6 +9,7 @@ import {
 import { Check, Zap, Crown, Star, Sparkles } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface PricingSectionProps {
   onPlanSelect: (
@@ -52,6 +53,7 @@ const PLAN_UI_META: Record<string, { icon: any; popular?: boolean }> = {
 };
 
 export function PricingSection({ onPlanSelect }: PricingSectionProps) {
+  const navigate = useNavigate();
   const [billingCycle, setBillingCycle] =
     useState<BillingCycle>("monthly");
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -80,6 +82,16 @@ export function PricingSection({ onPlanSelect }: PricingSectionProps) {
     if (billingCycle === "half-yearly") return "Save 10%";
     if (billingCycle === "yearly") return "Save 20%";
     return "";
+  };
+
+  const handlePlanClick = (plan: Plan) => {
+    if (plan.isEnterprise) {
+      // Enterprise plan redirects to contact page with sales inquiry type
+      navigate('/contact', { state: { initialType: 'sales' } });
+    } else {
+      // All other plans go through normal checkout flow
+      onPlanSelect(plan.licenseType, billingCycle);
+    }
   };
 
   /* ---------------- DATA LOAD ---------------- */
@@ -226,9 +238,7 @@ export function PricingSection({ onPlanSelect }: PricingSectionProps) {
                         ? "default"
                         : "outline"
                     }
-                    onClick={() =>
-                      onPlanSelect(plan.licenseType, billingCycle)
-                    }
+                    onClick={() => handlePlanClick(plan)}
                   >
                     {plan.isFree
                       ? "Get Started Free"

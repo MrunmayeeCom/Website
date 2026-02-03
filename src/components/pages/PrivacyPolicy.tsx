@@ -22,7 +22,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             <section>
               <h2 className="text-2xl mb-3">1. Information We Collect</h2>
               <p className="text-muted-foreground">
-                Trackon collects information necessary to provide field sales tracking services. This includes:
+                GeoTrack collects information necessary to provide field sales tracking services. This includes:
               </p>
               <ul className="list-disc list-inside space-y-2 mt-3 text-muted-foreground">
                 <li>Account information (name, email, phone number)</li>
@@ -69,14 +69,14 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
               <p className="text-muted-foreground">
                 You have the right to access, modify, or delete your personal information at any time. You can also 
                 request a copy of your data or opt-out of certain data collection practices. Contact us at 
-                privacy@trackon.com for data-related requests.
+                privacy@geotrack.com for data-related requests.
               </p>
             </section>
 
             <section>
               <h2 className="text-2xl mb-3">6. Location Data</h2>
               <p className="text-muted-foreground">
-                GPS location tracking is a core feature of Trackon. Location data is collected every 5 minutes 
+                GPS location tracking is a core feature of GeoTrack. Location data is collected every 5 minutes 
                 when the mobile app is active. Users can disable location tracking through the app settings, 
                 but this will limit functionality. Location history is retained for reporting purposes and can 
                 be deleted upon request.
@@ -86,7 +86,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             <section>
               <h2 className="text-2xl mb-3">7. Contact Us</h2>
               <p className="text-muted-foreground">
-                If you have any questions about this Privacy Policy, please contact us at privacy@trackon.com
+                If you have any questions about this Privacy Policy, please contact us at privacy@geotrack.com
               </p>
             </section>
           </div>

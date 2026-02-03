@@ -5,6 +5,7 @@ const API_KEY = "my-secret-key-123";
 interface SyncCustomerPayload {
   name: string;
   email: string;
+  password: string;
   source: string;
 } 
 

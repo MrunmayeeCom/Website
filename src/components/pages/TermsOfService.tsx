@@ -22,7 +22,7 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
             <section>
               <h2 className="text-2xl mb-3">1. Acceptance of Terms</h2>
               <p className="text-muted-foreground">
-                By accessing and using Trackon, you accept and agree to be bound by the terms and provisions of 
+                By accessing and using GeoTrack, you accept and agree to be bound by the terms and provisions of 
                 this agreement. If you do not agree to these terms, please do not use our service.
               </p>
             </section>
@@ -30,7 +30,7 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
             <section>
               <h2 className="text-2xl mb-3">2. Service Description</h2>
               <p className="text-muted-foreground">
-                Trackon provides field sales tracking software with features including:
+                GeoTrack provides field sales tracking software with features including:
               </p>
               <ul className="list-disc list-inside space-y-2 mt-3 text-muted-foreground">
                 <li>Real-time GPS location tracking</li>
@@ -56,7 +56,7 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
             <section>
               <h2 className="text-2xl mb-3">4. Location Tracking Consent</h2>
               <p className="text-muted-foreground">
-                By using Trackon's location tracking features, organizations agree to obtain proper consent from 
+                By using GeoTrack's location tracking features, organizations agree to obtain proper consent from 
                 field representatives whose locations are being tracked. Organizations are responsible for compliance 
                 with local employment and privacy laws regarding employee monitoring.
               </p>
@@ -65,7 +65,7 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
             <section>
               <h2 className="text-2xl mb-3">5. Data Usage and Ownership</h2>
               <p className="text-muted-foreground">
-                All client data, location logs, and business information entered into Trackon remain your property. 
+                All client data, location logs, and business information entered into GeoTrack remain your property. 
                 We claim no ownership rights over your data. You grant us permission to use your data solely to 
                 provide and improve our services.
               </p>
@@ -83,7 +83,7 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
             <section>
               <h2 className="text-2xl mb-3">7. Subscription and Payment</h2>
               <p className="text-muted-foreground">
-                Trackon operates on a subscription basis. Payment terms, pricing, and refund policies are outlined 
+                GeoTrack operates on a subscription basis. Payment terms, pricing, and refund policies are outlined 
                 in your subscription agreement. We reserve the right to modify pricing with 30 days notice to 
                 existing subscribers.
               </p>
@@ -101,7 +101,7 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
             <section>
               <h2 className="text-2xl mb-3">9. Limitation of Liability</h2>
               <p className="text-muted-foreground">
-                Trackon is provided "as is" without warranties of any kind. We are not liable for indirect, 
+                GeoTrack is provided "as is" without warranties of any kind. We are not liable for indirect, 
                 incidental, or consequential damages arising from use of the service. Our total liability 
                 shall not exceed the amount paid for the service in the past 12 months.
               </p>
@@ -118,7 +118,7 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
             <section>
               <h2 className="text-2xl mb-3">11. Contact Information</h2>
               <p className="text-muted-foreground">
-                For questions regarding these terms, contact us at legal@trackon.com
+                For questions regarding these terms, contact us at legal@geotrack.com
               </p>
             </section>
           </div>
