@@ -561,7 +561,7 @@ export function BecomePartnerPage({ onNavigateHome, onNavigateToPartnerDirectory
 
                   <div>
                     <label className="block text-sm font-semibold mb-2">
-                      Partner Type <span className="text-red-500">*</span>
+                      Join As <span className="text-red-500">*</span>
                     </label>
                     <select
                       name="partnerType"
@@ -571,11 +571,8 @@ export function BecomePartnerPage({ onNavigateHome, onNavigateToPartnerDirectory
                       className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors"
                     >
                       <option value="">Select type</option>
-                      <option value="reseller">Reseller Partner</option>
+                      <option value="reseller">Channel Partner</option>
                       <option value="distributor">Distributor</option>
-                      <option value="implementation">Implementation Partner</option>
-                      <option value="technology">Technology Partner</option>
-                      <option value="referral">Referral Partner</option>
                     </select>
                   </div>
 

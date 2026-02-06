@@ -11,6 +11,7 @@ export function Footer({ onNavigate }: FooterProps) {
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col items-center gap-4">
           <p className="text-sm text-center animate-fade-in">&copy; 2025 GeoTrack. All rights reserved.</p>
+          <p className="text-medium text-center animate-fade-in"> Powered by Averlon</p>
           <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-sm">
             <button 
               onClick={() => onNavigate('privacy')} 

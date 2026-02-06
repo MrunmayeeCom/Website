@@ -25,7 +25,7 @@ import { CookiePolicy } from "./components/pages/CookiePolicy";
 import { Security } from "./components/pages/Security";
 import { PartnerPage } from "./components/pages/PartnerPage";
 import { BecomePartnerPage } from "./components/pages/BecomePartnerPage";
-import { ContactPage } from "./components/pages/ContactPage";
+import { ContactSupportPage } from "./components/pages/ContactSupportPage";
 
 import { Toaster } from "./components/ui/sonner";
 import TutorialPage from "./components/TutorialPage";
@@ -44,39 +44,85 @@ export default function App() {
 
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("");
-  const [billingCycle, setBillingCycle] =
-    useState<BillingCycle>("monthly");
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
   const [pendingCheckout, setPendingCheckout] = useState(false);
 
   useEffect(() => {
     window.history.scrollRestoration = "manual";
   }, []);
 
-  /* ---------------- SCROLL TO SECTION ---------------- */
-  const scrollToSection = (sectionId: string) => {
-    const doScroll = () => {
-      const el = document.getElementById(sectionId);
-      if (!el) return;
-
-      const yOffset = -80;
-      const y =
-        el.getBoundingClientRect().top +
-        window.pageYOffset +
-        yOffset;
-
-      window.scrollTo({ top: y, behavior: "smooth" });
+  /* ---------------- SCROLL TO SECTION ON ROUTE CHANGE ---------------- */
+  useEffect(() => {
+    // Map of routes to section IDs
+    const sectionRoutes: Record<string, string> = {
+      "/pricing": "pricing",
+      "/faqs": "faqs",
+      "/features": "features",
+      "/product": "product",
+      "/why-us": "why-us",
     };
 
-    // If not on home page, navigate first
-    if (location.pathname !== "/") {
-      navigate("/");
-      setTimeout(() => {
-        doScroll();
-      }, 100);
-    } else {
-      // Already on home, just scroll
-      doScroll();
+    const sectionId = sectionRoutes[location.pathname];
+
+    if (sectionId) {
+      // Use requestAnimationFrame for better timing
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          const el = document.getElementById(sectionId);
+          if (el) {
+            const headerOffset = 100; // Account for fixed header
+            const elementPosition = el.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: "smooth",
+            });
+          }
+        }, 150);
+      });
+    } else if (location.pathname === "/") {
+      // Scroll to top when navigating to home only if no hash
+      if (!location.hash) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     }
+
+    // Also handle hash-based navigation (e.g., /#pricing)
+    if (location.hash) {
+      const hashId = location.hash.substring(1);
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          const el = document.getElementById(hashId);
+          if (el) {
+            const headerOffset = 100;
+            const elementPosition = el.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: "smooth",
+            });
+          }
+        }, 150);
+      });
+    }
+  }, [location.pathname, location.hash]);
+
+  /* ---------------- SCROLL TO SECTION HELPER ---------------- */
+  const scrollToSection = (sectionId: string) => {
+    // Map section IDs to their routes
+    const sectionToRoute: Record<string, string> = {
+      pricing: "/pricing",
+      faqs: "/faqs",
+      features: "/features",
+      product: "/product",
+      "why-us": "/why-us",
+      home: "/",
+    };
+
+    const route = sectionToRoute[sectionId] || "/";
+    navigate(route);
   };
 
   const scrollToPricing = () => scrollToSection("pricing");
@@ -91,10 +137,20 @@ export default function App() {
     setPendingCheckout(false);
   };
 
+  const handleLoginSuccess = () => {
+    setLoginModalOpen(false);
+    
+    if (pendingCheckout) {
+      const planSlug = selectedPlan.toLowerCase().replace(/\s+/g, "-");
+      navigate(`/checkout/${planSlug}`);
+      setPendingCheckout(false);
+    }
+  };
+
   const handlePlanSelect = (plan: string, cycle: BillingCycle) => {
     setSelectedPlan(plan);
     setBillingCycle(cycle);
-    
+
     // Check if user is already logged in
     const userStr = localStorage.getItem("user");
     if (userStr) {
@@ -111,7 +167,7 @@ export default function App() {
   const handleGetStartedClick = () => {
     setSelectedPlan("Starter");
     setBillingCycle("monthly");
-    
+
     // Check if user is already logged in
     const userStr = localStorage.getItem("user");
     if (userStr) {
@@ -133,6 +189,7 @@ export default function App() {
     page: "privacy" | "terms" | "cookies" | "security"
   ) => {
     navigate(`/${page}`);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   /* ---------------- HOME PAGE ---------------- */
@@ -171,12 +228,11 @@ export default function App() {
 
   /* ---------------- CURRENT PAGE DETECTOR ---------------- */
 
-  const currentPage =
-    location.pathname.startsWith("/partners")
-      ? "partners"
-      : location.pathname.startsWith("/become-partner")
-      ? "become-partner"
-      : "home";
+  const currentPage = location.pathname.startsWith("/partners")
+    ? "partners"
+    : location.pathname.startsWith("/become-partner")
+    ? "become-partner"
+    : "home";
 
   return (
     <div className="min-h-screen bg-background">
@@ -192,7 +248,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
 
-        {/* Section routes that maintain URL permalinks */}
+        {/* Section routes that maintain URL permalinks and auto-scroll */}
         <Route path="/pricing" element={<HomePage />} />
         <Route path="/faqs" element={<HomePage />} />
         <Route path="/features" element={<HomePage />} />
@@ -215,16 +271,28 @@ export default function App() {
 
         <Route path="/payment-success" element={<PaymentSuccess />} />
 
-        <Route path="/privacy" element={<PrivacyPolicy onBack={() => navigate("/")} />} />
-        <Route path="/terms" element={<TermsOfService onBack={() => navigate("/")} />} />
-        <Route path="/cookies" element={<CookiePolicy onBack={() => navigate("/")} />} />
-        <Route path="/security" element={<Security onBack={() => navigate("/")} />} />
+        <Route
+          path="/privacy"
+          element={<PrivacyPolicy onBack={() => navigate("/")} />}
+        />
+        <Route
+          path="/terms"
+          element={<TermsOfService onBack={() => navigate("/")} />}
+        />
+        <Route
+          path="/cookies"
+          element={<CookiePolicy onBack={() => navigate("/")} />}
+        />
+        <Route
+          path="/security"
+          element={<Security onBack={() => navigate("/")} />}
+        />
 
         <Route
           path="/contact"
           element={
             <>
-              <ContactPage onBack={() => navigate("/")} />
+              <ContactSupportPage onBack={() => navigate("/")} />
               <Footer onNavigate={handleFooterNavigate} />
             </>
           }
@@ -234,7 +302,9 @@ export default function App() {
           path="/partners"
           element={
             <>
-              <PartnerPage onBecomePartnerClick={() => navigate("/become-partner")} />
+              <PartnerPage
+                onBecomePartnerClick={() => navigate("/become-partner")}
+              />
               <Footer onNavigate={handleFooterNavigate} />
             </>
           }
@@ -244,7 +314,7 @@ export default function App() {
           path="/become-partner"
           element={
             <>
-              <BecomePartnerPage 
+              <BecomePartnerPage
                 onNavigateHome={() => navigate("/")}
                 onNavigateToPartnerDirectory={() => navigate("/partners")}
                 onContactClick={() => navigate("/contact")}
@@ -260,8 +330,8 @@ export default function App() {
       <LoginModal
         open={loginModalOpen}
         onOpenChange={setLoginModalOpen}
-        onAdminLogin={() => handleAdminLogin()}
-        onLoginSuccess={() => setLoginModalOpen(false)}
+        onAdminLogin={handleAdminLogin}
+        onLoginSuccess={handleLoginSuccess}
         onNavigateToPricing={scrollToPricing}
       />
 

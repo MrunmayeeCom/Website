@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 import { purchaseLicense } from "../api/license";
 import { createOrder, verifyPayment } from "../api/payment";
 import { checkCustomerExists, syncCustomer } from "../api/customerSync";
-import { loadRazorpay } from "../utils/loadRazorpay"
+import { loadRazorpay } from "../utils/loadRazorpay";
 import { getStoredUser } from "../api/auth";
 
 type BillingCycle = "monthly" | "quarterly" | "half-yearly" | "yearly";
@@ -106,15 +106,6 @@ export function CheckoutPage({
     }
 
     try {
-
-      // const exists = await checkCustomerExists(loggedInUser.email);
-      // if (!exists) {
-      //   await syncCustomer({
-      //     name: formData.companyName,
-      //     email: loggedInUser.email,
-      //     source: "GeoTrack",
-      //   });
-      // }
 
       // Handle free plan
       if (lmsPlan.pricePerUser === 0) {

@@ -73,7 +73,7 @@ export function PricingSection({ onPlanSelect }: PricingSectionProps) {
   const getBillingText = () => {
     if (billingCycle === "monthly") return "/user/month";
     if (billingCycle === "quarterly") return "/user/quarter";
-    if (billingCycle === "half-yearly") return "/user/6 months";
+    if (billingCycle === "half-yearly") return "/user/half-yearly";
     return "/user/year";
   };
 
@@ -146,7 +146,7 @@ export function PricingSection({ onPlanSelect }: PricingSectionProps) {
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16 animate-fade-in-up">
           <h2 className="mb-4 text-primary">
-            <span className="text-accent">Pricing</span>
+            <span className="text-accent ">Pricing</span>
           </h2>
 
           <div className="mt-8 flex justify-center">
@@ -204,13 +204,13 @@ export function PricingSection({ onPlanSelect }: PricingSectionProps) {
                   </div>
                   <CardDescription>{plan.description}</CardDescription>
 
-                  <div className="pt-4">
+                  <div className="p-2">
                     <div className="flex items-baseline gap-2">
                       {plan.isFree ? (
-                        <span className="text-4xl">Free</span>
+                        <span className="text-xl">Free</span>
                       ) : (
                         <>
-                          <span className="text-4xl">
+                          <span className="text-xl">
                             ₹{getPrice(plan).toLocaleString('en-IN')}
                           </span>
                           <span className="text-muted-foreground">
